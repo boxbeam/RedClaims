@@ -1,0 +1,51 @@
+claim claim:claim {
+	permission redclaims.use
+	info {
+		postarg
+		hook claimInfo
+		help Get info on a claim
+	}
+	info {
+		hook currentClaimInfo
+		context currentClaim
+		help Get info on a claim
+	}
+	delete {
+		postarg
+		hook deleteClaim
+		help Deletes a claim
+	}
+	protection {
+		postarg
+		add flag:flag {
+			hook addClaimFlag
+			help Adds a protection flag to the claim
+		}
+		remove flag:flag {
+			hook removeClaimFlag
+			help Removes a protection flag from the claim
+		}
+	}
+	setrole user:user role:role {
+		postarg
+		help Set the role of a user in a claim
+		hook setRole
+	}
+}
+claim string:name {
+	create {
+		postarg
+		hook createClaim
+		help Create a claim from your selection
+		permission redclaims.create
+		context selection
+		user player
+	}
+}
+claimadmin {
+	permission redclaims.admin
+	tool player:target?(context self) {
+		help Give the claim tool
+		hook tool
+	}
+}

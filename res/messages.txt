@@ -1,0 +1,11 @@
+noSelection: &cYou do not have a region selected!
+errorColor: &c
+claimCreated: &aClaim created!
+notInClaim: &cYou are not in a claim!
+claimDeleted: &aClaim deleted!
+notOwner: &cYou do not own this claim!
+protectionAdded: &aProtection added!
+protectionRemoved: &aProtection removed!
+insufficientPermission: &cInsufficient permission
+cannotSetOwnerRole: &cYou cannot change the owner's role directly! To change the owner, run '/claim <claim> setrole <user> owner' on another player
+roleSet: &aRole set!
