@@ -24,7 +24,7 @@ repositories {
 }
 dependencies {
 	compileOnly "org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT"
-	compileOnly files("/home/redempt/Desktop/Spigot/1.15/plugins/RedLib.jar")
+	compileOnly "com.github.Redempt:RedLib:d380e3c"
 }
 sourceSets {
 	main {
