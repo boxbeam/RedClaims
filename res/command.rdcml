@@ -1,12 +1,11 @@
-claim claim:claim {
-	permission redclaims.use
+claim,c claim:claim {
 	info {
 		postarg
 		hook claimInfo
 		help Get info on a claim
 	}
 	info {
-		hook currentClaimInfo
+		hook claimInfo
 		context currentClaim
 		help Get info on a claim
 	}
@@ -17,13 +16,13 @@ claim claim:claim {
 	}
 	protection {
 		postarg
-		add flag:flag {
+		add flag[]:flags {
 			hook addClaimFlag
-			help Adds a protection flag to the claim
+			help Add a protection flag to the claim
 		}
-		remove flag:flag {
+		remove flag[]:flags {
 			hook removeClaimFlag
-			help Removes a protection flag from the claim
+			help Remove a protection flag from the claim
 		}
 	}
 	setrole user:user role:role {
@@ -31,8 +30,49 @@ claim claim:claim {
 		help Set the role of a user in a claim
 		hook setRole
 	}
+	rename string:name {
+		postarg
+		help Renames a claim
+		hook renameClaim
+	}
+	visualize,v {
+		help Visualize the boundaries of the claim you are currently in
+		hook visualize
+		context currentClaim
+		user player
+	}
+	unvisualize,uv {
+		help Removes visualization of the boundaries of the claim you're in
+		hook unvisualize
+		context currentClaim
+		user player
+	}
+	sub subclaim:subclaim {
+		postarg
+		protection {
+			postarg
+			add flag[]:flags {
+				hook addSubclaimFlag
+				help Add a protection flag to a subclaim
+			}
+			remove flag[]:flags {
+				hook removeSubclaimFlag
+				help Remove a protection flag from a subclaim
+			}
+		}
+	}
+	sub string:name {
+		postarg
+		create {
+			postarg
+			help Create a subclaim
+			hook createSubclaim
+			context selection
+			hook createSubclaim
+		}
+	}
 }
-claim string:name {
+claim,c string:name {
 	create {
 		postarg
 		hook createClaim
@@ -40,12 +80,5 @@ claim string:name {
 		permission redclaims.create
 		context selection
 		user player
-	}
-}
-claimadmin {
-	permission redclaims.admin
-	tool player:target?(context self) {
-		help Give the claim tool
-		hook tool
 	}
 }

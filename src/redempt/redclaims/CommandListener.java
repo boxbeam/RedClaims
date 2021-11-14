@@ -2,6 +2,7 @@ package redempt.redclaims;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -25,6 +26,7 @@ import redempt.redlib.region.SelectionTool;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class CommandListener {
@@ -99,18 +101,80 @@ public class CommandListener {
 	
 	@CommandHook("createClaim")
 	public void createClaim(Player sender, String name, CuboidRegion selection) {
+		if (name.length() > 16) {
+			sender.sendMessage(Messages.msg("claimNameTooLong"));
+			return;
+		}
+		Location start = selection.getStart();
+		Location end = selection.getEnd();
+		start.setY(0);
+		end.setY(end.getWorld().getMaxHeight());
+		selection = new CuboidRegion(start, end);
 		try {
-			plugin.getClaimStorage().createClaim(sender, name, selection);
+			plugin.getClaimStorage().createClaim(sender, name, selection).visualize(sender);
 			sender.sendMessage(Messages.msg("claimCreated"));
 		} catch (IllegalArgumentException e) {
 			sender.sendMessage(Messages.msg("errorColor") + e.getMessage());
 		}
 	}
 	
+	@CommandHook("createSubclaim")
+	public void createSubclaim(Player sender, Claim claim, String name, CuboidRegion selection) {
+		if (name.length() > 16) {
+			sender.sendMessage(Messages.msg("claimNameTooLong"));
+			return;
+		}
+		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
+			sender.sendMessage(Messages.msg("notOwner"));
+			return;
+		}
+		if (Arrays.stream(selection.getBlockDimensions()).anyMatch(i -> i < 3)) {
+			sender.sendMessage(Messages.msg("subclaimTooSmall"));
+			return;
+		}
+		try {
+			claim.createSubclaim(name, selection);
+			claim.visualize(sender);
+			sender.sendMessage(Messages.msg("subclaimCreated"));
+		} catch (IllegalArgumentException e) {
+			sender.sendMessage(Messages.msg("errorColor") + e.getMessage());
+		}
+	}
+	
+	@CommandHook("addSubclaimFlag")
+	public void addSubclaimFlags(CommandSender sender, Claim claim, Subclaim subclaim, ClaimFlag[] flags) {
+		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
+			sender.sendMessage(Messages.msg("notOwner"));
+			return;
+		}
+		subclaim.addFlag(flags);
+		sender.sendMessage(Messages.msg("protectionAdded"));
+	}
+	
+	@CommandHook("removeSubclaimFlag")
+	public void removeSubclaimFlags(CommandSender sender, Claim claim, Subclaim subclaim, ClaimFlag[] flags) {
+		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
+			sender.sendMessage(Messages.msg("notOwner"));
+			return;
+		}
+		subclaim.removeFlag(flags);
+		sender.sendMessage(Messages.msg("protectionRemoved"));
+	}
+	
 	@CommandHook("claimInfo")
 	public void claimInfo(CommandSender sender, Claim claim) {
-		sender.sendMessage(claim.getName() + " is owned by " + claim.getOwner().getName());
-		sender.sendMessage("flags: " + claim.getFlags().stream().map(ClaimFlag::getName).collect(Collectors.joining(", ")));
+		sender.sendMessage(Messages.msg("claimInfoHeader").replace("%name%", claim.getOwner().getName() + ":" + claim.getName()));
+		String primary = Messages.msg("primaryColor");
+		String secondary = Messages.msg("secondaryColor");
+		sender.sendMessage(Messages.msg("claimFlags").replace("%flags%", claim.getFlags().stream().map(f -> secondary + f.getName()).collect(Collectors.joining(primary + ", "))));
+		sender.sendMessage(Messages.msg("claimMembers").replace("%members%", claim.getAllMembers().entrySet().stream()
+				.filter(e -> e.getValue() == ClaimRank.MEMBER)
+				.map(e -> secondary + Bukkit.getOfflinePlayer(e.getKey()).getName())
+				.collect(Collectors.joining(primary + ", "))));
+		sender.sendMessage(Messages.msg("claimTrusted").replace("%members%", claim.getAllMembers().entrySet().stream()
+				.filter(e -> e.getValue() == ClaimRank.TRUSTED)
+				.map(e -> secondary + Bukkit.getOfflinePlayer(e.getKey()).getName())
+				.collect(Collectors.joining(primary + ", "))));
 	}
 	
 	@CommandHook("deleteClaim")
@@ -145,27 +209,31 @@ public class CommandListener {
 				}
 				break;
 		}
-		claim.setRank(user, rank);
-		sender.sendMessage(Messages.msg("roleSet"));
+		try {
+			claim.setRank(user, rank);
+			sender.sendMessage(Messages.msg("roleSet"));
+		} catch (IllegalArgumentException e) {
+			sender.sendMessage(Messages.msg("cannotTransferOwnership"));
+		}
 	}
 	
 	@CommandHook("addClaimFlag")
-	public void addClaimFlag(CommandSender sender, Claim claim, ClaimFlag flag) {
+	public void addClaimFlag(CommandSender sender, Claim claim, ClaimFlag[] flags) {
 		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
 			sender.sendMessage(Messages.msg("notOwner"));
 			return;
 		}
-		claim.addFlag(flag);
+		claim.addFlag(flags);
 		sender.sendMessage(Messages.msg("protectionAdded"));
 	}
 	
 	@CommandHook("removeClaimFlag")
-	public void removeClaimFlag(CommandSender sender, Claim claim, ClaimFlag flag) {
+	public void removeClaimFlag(CommandSender sender, Claim claim, ClaimFlag[] flags) {
 		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
 			sender.sendMessage(Messages.msg("notOwner"));
 			return;
 		}
-		claim.removeFlag(flag);
+		claim.removeFlag(flags);
 		sender.sendMessage(Messages.msg("protectionRemoved"));
 	}
 	
@@ -174,9 +242,28 @@ public class CommandListener {
 		claimInfo(player, claim);
 	}
 	
-	@CommandHook("tool")
-	public void giveTool(CommandSender sender, Player target) {
-		ItemUtils.give(target, tool.getItem());
+	@CommandHook("renameClaim")
+	public void renameClaim(CommandSender sender, Claim claim, String name) {
+		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
+			sender.sendMessage(Messages.msg("notOwner"));
+			return;
+		}
+		try {
+			plugin.getClaimStorage().renameClaim(claim, name);
+			sender.sendMessage(Messages.msg("claimRenamed"));
+		}catch (IllegalArgumentException e) {
+			sender.sendMessage(Messages.msg("errorColor") + e.getMessage());
+		}
+	}
+	
+	@CommandHook("visualize")
+	public void visualize(Player player, Claim claim) {
+		claim.visualize(player);
+	}
+	
+	@CommandHook("unvisualize")
+	public void unvisualize(Player player, Claim claim) {
+		claim.unvisualize(player);
 	}
 	
 }

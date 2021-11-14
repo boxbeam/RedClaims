@@ -4,8 +4,21 @@ claimCreated: &aClaim created!
 notInClaim: &cYou are not in a claim!
 claimDeleted: &aClaim deleted!
 notOwner: &cYou do not own this claim!
-protectionAdded: &aProtection added!
-protectionRemoved: &aProtection removed!
+protectionAdded: &aProtections added!
+protectionRemoved: &aProtections removed!
 insufficientPermission: &cInsufficient permission
 cannotSetOwnerRole: &cYou cannot change the owner's role directly! To change the owner, run '/claim <claim> setrole <user> owner' on another player
 roleSet: &aRole set!
+claimInfoHeader: &aClaim: &e%name%
+claimFlags: &aProtections: %flags%
+primaryColor: &a
+secondaryColor: &e
+claimMembers: &aMembers: %members%
+claimTrusted: &aTrusted: %members%
+cannotTransferOwnership: &cCannot transfer ownership, that player already has a claim with the same name!
+claimRenamed: &aClaim renamed!
+claimNameTooLong: &cYour claim's name may not be longer than 16 characters!
+enteringClaim: &a%player%'s claim %claim%
+exitingClaim: &aWilderness
+subclaimCreated: &aSubclaim created!
+subclaimTooSmall: &cA subclaim must be at least 3x3x3!

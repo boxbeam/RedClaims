@@ -16,6 +16,8 @@ public class ClaimFlag {
 			new ClaimFlag(Material.FLINT_AND_STEEL, "fire", ProtectionType.FIRE),
 			new ClaimFlag(Material.OAK_DOOR, "interact", ProtectionType.INTERACT),
 			new ClaimFlag(Material.CHEST, "containers", ProtectionType.CONTAINER_ACCESS),
+			new ClaimFlag(Material.DIAMOND_SWORD, "pvp"),
+			new ClaimFlag(Material.PORKCHOP, "animals")
 	};
 	
 	public static final Map<String, ClaimFlag> BY_NAME = Arrays.stream(ALL).collect(HashMap::new, (m, c) -> m.put(c.name, c), HashMap::putAll);
