@@ -13,6 +13,7 @@ claimInfoHeader: &aClaim: &e%name%
 claimFlags: &aProtections: %flags%
 primaryColor: &a
 secondaryColor: &e
+claimBlocks: &aClaim size: &e%blocks%
 claimMembers: &aMembers: %members%
 claimTrusted: &aTrusted: %members%
 cannotTransferOwnership: &cCannot transfer ownership, that player already has a claim with the same name!

@@ -165,6 +165,8 @@ public class CommandListener {
 		sender.sendMessage(Messages.msg("claimInfoHeader").replace("%name%", claim.getOwner().getName() + ":" + claim.getName()));
 		String primary = Messages.msg("primaryColor");
 		String secondary = Messages.msg("secondaryColor");
+		ClaimStorage storage = plugin.getClaimStorage();
+		sender.sendMessage(Messages.msg("claimBlocks").replace("%blocks%", storage.getClaimBlocks(claim) + ""));
 		sender.sendMessage(Messages.msg("claimFlags").replace("%flags%", claim.getFlags().stream().map(f -> secondary + f.getName()).collect(Collectors.joining(primary + ", "))));
 		sender.sendMessage(Messages.msg("claimMembers").replace("%members%", claim.getAllMembers().entrySet().stream()
 				.filter(e -> e.getValue() == ClaimRank.MEMBER)
