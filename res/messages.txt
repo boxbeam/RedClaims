@@ -22,3 +22,13 @@ enteringClaim: &a%player%'s claim %claim%
 exitingClaim: &aWilderness
 subclaimCreated: &aSubclaim created!
 subclaimTooSmall: &cA subclaim must be at least 3x3x3!
+firstCornerSelected: &aFirst corner selected!
+secondCornerSelected: &aSecond corner selected!
+claimOverlap: &cThis claim would overlap an existing claim!
+claimTooSmall: &cClaim too small: %dims%
+claimTooLarge: &cClaim exceeds block budget: %blocks% > %budget%
+claimToolInfo: &a%dims%, %blocks% < %budget%
+subclaimTooSmallTool: &cSubclaim too small: %dims%
+subclaimOverlaps: &cSubclaim overlaps existing subclaims
+subclaimValid: &aSubclaim is valid
+claimBudget: &aClaim budget: &e%budget%

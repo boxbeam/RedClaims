@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import redempt.redclaims.ClaimFlag;
+import redempt.redclaims.ClaimLimits;
 import redempt.redlib.region.CuboidRegion;
 import redempt.redlib.sql.SQLHelper;
 
@@ -97,6 +98,14 @@ public class ClaimStorage {
 	}
 	
 	public Claim createClaim(Player owner, String name, CuboidRegion region) {
+		int[] dim = region.getBlockDimensions();
+		if (dim[0] < 10 || dim[2] < 10) {
+			throw new IllegalArgumentException("Claim is too small, must be at least 10x10");
+		}
+		int claimBlocks = dim[0] * dim[2];
+		if (claimBlocks > ClaimLimits.getRemainingClaimLimit(owner)) {
+			throw new IllegalArgumentException("Insufficient claim budget to create this claim");
+		}
 		if (ClaimMap.getClaims(region).size() != 0) {
 			throw new IllegalArgumentException("Claim would overlap an existing claim");
 		}

@@ -148,15 +148,15 @@ public class Claim {
 	
 	private BlockFace[] FACES = {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
 	
-	public void visualize(Player player) {
-		visualize(player, player::sendBlockChange);
+	public void visualize(Player player, boolean subclaims) {
+		visualize(player, subclaims, player::sendBlockChange);
 	}
 	
 	public void unvisualize(Player player) {
-		visualize(player, (l, b) -> player.sendBlockChange(l, l.getBlock().getBlockData()));
+		visualize(player, true, (l, b) -> player.sendBlockChange(l, l.getBlock().getBlockData()));
 	}
 	
-	protected void visualize(Player player, BiConsumer<Location, BlockData> updater) {
+	protected void visualize(Player player, boolean subclaims, BiConsumer<Location, BlockData> updater) {
 		CuboidRegion region = getRegion();
 		Location[] corners = region.clone().expand(-1, 0, -1, 0, -1, 0).getCorners();
 		List<Location> locations = new ArrayList<>();
@@ -188,7 +188,9 @@ public class Claim {
 				}
 			}
 		}
-		subclaims.forEach(s -> s.visualize(player, updater));
+		if (subclaims) {
+			this.subclaims.forEach(s -> s.visualize(player, false, updater));
+		}
 	}
 	
 	public boolean flagApplies(Location loc, String name) {

@@ -46,6 +46,10 @@ public class RedClaims extends JavaPlugin implements Listener {
 		ClaimLimits.init(this, defaultClaimBlocks);
 	}
 	
+	public Material getClaimToolMaterial() {
+		return claimTool;
+	}
+	
 	@Override
 	public void onDisable() {
 		storage.close();

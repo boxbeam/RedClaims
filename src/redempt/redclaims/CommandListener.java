@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import redempt.redclaims.claim.Claim;
 import redempt.redclaims.claim.ClaimMap;
 import redempt.redclaims.claim.ClaimRank;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 public class CommandListener {
 	
 	private RedClaims plugin;
-	private SelectionTool tool;
+	private ClaimTool tool;
 	
 	public CommandListener(RedClaims plugin) {
 		this.plugin = plugin;
@@ -88,10 +89,10 @@ public class CommandListener {
 		ArgType<OfflinePlayer> userType = new ArgType<>("user", UserCache::getOfflinePlayer).tabStream(c -> Bukkit.getOnlinePlayers().stream().map(Player::getName));
 		ArgType<ClaimRank> rankType = new ArgType<>("role", s -> ClaimRank.valueOf(s.toUpperCase())).tabStream(c -> Arrays.stream(ClaimRank.values()).map(r -> r.name().toLowerCase()));
 		
-		ContextProvider<CuboidRegion> selectionProvider = new ContextProvider<>("selection", Messages.msg("noSelection"), c -> tool.getRegion(c.getUniqueId()));
+		ContextProvider<CuboidRegion> selectionProvider = new ContextProvider<>("selection", Messages.msg("noSelection"), c -> tool.getSelection(c.getUniqueId()));
 		ContextProvider<Claim> currentClaimProvider = new ContextProvider<>("currentClaim", Messages.msg("notInClaim"), c -> ClaimMap.getClaim(c.getLocation()));
 		
-		tool = new SelectionTool(new ItemBuilder(Material.STICK).setName(ChatColor.GREEN + "Claiming tool"));
+		tool = new ClaimTool(plugin, new ItemStack(plugin.getClaimToolMaterial()));
 		
 		new CommandParser(plugin.getResource("command.rdcml"))
 				.setArgTypes(claimType, subclaimType, flagType, userType, rankType)
@@ -107,11 +108,11 @@ public class CommandListener {
 		}
 		Location start = selection.getStart();
 		Location end = selection.getEnd();
-		start.setY(0);
+		start.setY(end.getWorld().getMinHeight());
 		end.setY(end.getWorld().getMaxHeight());
 		selection = new CuboidRegion(start, end);
 		try {
-			plugin.getClaimStorage().createClaim(sender, name, selection).visualize(sender);
+			plugin.getClaimStorage().createClaim(sender, name, selection).visualize(sender, false);
 			sender.sendMessage(Messages.msg("claimCreated"));
 		} catch (IllegalArgumentException e) {
 			sender.sendMessage(Messages.msg("errorColor") + e.getMessage());
@@ -134,7 +135,7 @@ public class CommandListener {
 		}
 		try {
 			claim.createSubclaim(name, selection);
-			claim.visualize(sender);
+			claim.visualize(sender, true);
 			sender.sendMessage(Messages.msg("subclaimCreated"));
 		} catch (IllegalArgumentException e) {
 			sender.sendMessage(Messages.msg("errorColor") + e.getMessage());
@@ -258,12 +259,31 @@ public class CommandListener {
 	
 	@CommandHook("visualize")
 	public void visualize(Player player, Claim claim) {
-		claim.visualize(player);
+		claim.visualize(player, true);
 	}
 	
 	@CommandHook("unvisualize")
 	public void unvisualize(Player player, Claim claim) {
 		claim.unvisualize(player);
+	}
+	
+	@CommandHook("budget")
+	public void budget(CommandSender sender, Player player) {
+		int budget = ClaimLimits.getClaimLimit(player);
+		int used = plugin.getClaimStorage().getClaimedBlocks(player.getUniqueId());
+		sender.sendMessage(Messages.msg("claimBudget").replace("%budget%", used + " / " + budget));
+	}
+	
+	@CommandHook("setBudget")
+	public void setBudget(CommandSender sender, Player player, int budget) {
+		ClaimLimits.setClaimLimit(player, budget);
+		sender.sendMessage(ChatColor.GREEN + "Claim limit set!");
+	}
+	
+	@CommandHook("addBudget")
+	public void addBudget(CommandSender sender, Player player, int budget) {
+		ClaimLimits.addClaimLimit(player, budget);
+		sender.sendMessage(ChatColor.GREEN + "Claim limit set!");
 	}
 	
 }

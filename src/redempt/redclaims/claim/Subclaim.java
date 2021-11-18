@@ -54,7 +54,7 @@ public class Subclaim extends Claim {
 	}
 	
 	@Override
-	protected void visualize(Player player, BiConsumer<Location, BlockData> updater) {
+	protected void visualize(Player player, boolean subclaims, BiConsumer<Location, BlockData> updater) {
 		CuboidRegion region = getRegion();
 		Location[] corners = region.clone().expand(-1, 0, -1, 0, -1, 0).getCorners();
 		for (Location corner : corners) {

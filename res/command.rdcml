@@ -1,4 +1,10 @@
 claim,c claim:claim {
+	budget {
+		help Shows your claim budget and how much of it you have used
+		user player
+		hook budget
+		context self
+	}
 	info {
 		postarg
 		hook claimInfo
@@ -49,6 +55,7 @@ claim,c claim:claim {
 	}
 	sub subclaim:subclaim {
 		postarg
+
 		protection {
 			postarg
 			add flag[]:flags {
@@ -80,5 +87,22 @@ claim,c string:name {
 		permission redclaims.create
 		context selection
 		user player
+	}
+}
+claimadmin,cadmin {
+	permission redclaims.admin
+	budget player:player {
+		help Shows the block limit of a player
+		hook budget
+		set int:budget {
+			postarg
+			help Sets the budget of a player
+			hook setBudget
+		}
+		add int:budget {
+			postarg
+			help Adds blocks to a player's budget
+			hook addBudget
+		}
 	}
 }
