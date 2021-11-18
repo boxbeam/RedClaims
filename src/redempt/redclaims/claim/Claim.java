@@ -9,6 +9,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import redempt.redclaims.ClaimBypass;
 import redempt.redclaims.ClaimFlag;
 import redempt.redclaims.RedClaims;
 import redempt.redlib.protection.ProtectedRegion;
@@ -132,6 +133,7 @@ public class Claim {
 		ProtectionPolicy policy = this.region.getPolicy();
 		policy.addProtectionTypes(DEFAULT_PROTECTIONS);
 		policy.addBypassPolicy((p, t) -> p != null && getRank(p).getRank() >= ClaimRank.MEMBER.getRank());
+		policy.addBypassPolicy((p, t) -> p != null && ClaimBypass.hasBypass(p.getUniqueId()));
 		policy.addBypassPolicy((p, t, b) -> subclaims.stream().anyMatch(c ->
 				c.getRegion().contains(b) && (!c.getFlags().contains(ClaimFlag.BY_TYPE.get(t)) || c.getRank(p).getRank() >= ClaimRank.MEMBER.getRank())));
 		flags.forEach(f -> policy.addProtectionTypes(f.getProtectionTypes()));

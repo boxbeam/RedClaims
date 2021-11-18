@@ -192,21 +192,23 @@ public class CommandListener {
 			sender.sendMessage(Messages.msg("cannotSetOwnerRole"));
 			return;
 		}
-		switch (rank) {
-			case VISITOR:
-			case MEMBER:
-				if (!claim.hasAtLeast(sender, ClaimRank.TRUSTED)
-						|| (sender instanceof Player && claim.getRank(user).getRank() >= claim.getRank((Player) sender).getRank())) {
-					sender.sendMessage(Messages.msg("insufficientPermission"));
-					return;
-				}
-				break;
-			case TRUSTED:
-				if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
-					sender.sendMessage(Messages.msg("insufficientPermission"));
-					return;
-				}
-				break;
+		if (!sender.hasPermission("redclaims.admin")) {
+			switch (rank) {
+				case VISITOR:
+				case MEMBER:
+					if (!claim.hasAtLeast(sender, ClaimRank.TRUSTED)
+							|| (sender instanceof Player && claim.getRank(user).getRank() >= claim.getRank((Player) sender).getRank())) {
+						sender.sendMessage(Messages.msg("insufficientPermission"));
+						return;
+					}
+					break;
+				case TRUSTED:
+					if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
+						sender.sendMessage(Messages.msg("insufficientPermission"));
+						return;
+					}
+					break;
+			}
 		}
 		try {
 			claim.setRank(user, rank);
@@ -282,6 +284,11 @@ public class CommandListener {
 	public void addBudget(CommandSender sender, Player player, int budget) {
 		ClaimLimits.addClaimLimit(player, budget);
 		sender.sendMessage(ChatColor.GREEN + "Claim limit set!");
+	}
+	
+	@CommandHook("bypass")
+	public void bypass(Player player) {
+		player.sendMessage(ChatColor.GREEN + "Claim bypass " + (ClaimBypass.toggle(player.getUniqueId()) ? "enabled" : "disabled") + "!");
 	}
 	
 }

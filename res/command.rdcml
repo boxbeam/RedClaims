@@ -105,4 +105,9 @@ claimadmin,cadmin {
 			hook addBudget
 		}
 	}
+	bypass {
+		help Toggles claim bypass mode
+		hook bypass
+		user player
+	}
 }
