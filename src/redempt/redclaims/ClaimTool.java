@@ -21,11 +21,11 @@ import redempt.redclaims.claim.ClaimMap;
 import redempt.redlib.commandmanager.Messages;
 import redempt.redlib.enchants.events.PlayerChangedHeldItemEvent;
 import redempt.redlib.itemutils.ItemUtils;
+import redempt.redlib.misc.LocationUtils;
 import redempt.redlib.misc.Task;
 import redempt.redlib.region.CuboidRegion;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +80,10 @@ public class ClaimTool implements Listener {
 			return null;
 		}
 		return new CuboidRegion(locs[0], locs[1]).expand(1, 0, 1, 0, 1, 0);
+	}
+	
+	public void clearSelection(UUID id) {
+		selections.remove(id);
 	}
 	
 	@EventHandler
@@ -148,7 +152,7 @@ public class ClaimTool implements Listener {
 				return;
 			}
 			Location[] locs = selections.get(player.getUniqueId());
-			if (locs == null || locs[0] == null || locs[1] != null || !locs[0].getWorld().equals(player.getWorld())) {
+			if (locs == null || locs[0] == null || !locs[0].getWorld().equals(player.getWorld())) {
 				cancel();
 				return;
 			}
@@ -157,11 +161,14 @@ public class ClaimTool implements Listener {
 				displayer.clear();
 				return;
 			}
-			Block block = player.getTargetBlockExact(4);
-			if (block == null) {
-				return;
+			Location loc = locs[1];
+			if (loc == null) {
+				Block block = player.getTargetBlockExact(4);
+				if (block == null) {
+					return;
+				}
+				loc = block.getLocation();
 			}
-			Location loc = block.getLocation();
 			showSelection(locs[0], loc);
 		}
 		
@@ -223,7 +230,7 @@ public class ClaimTool implements Listener {
 		private void showCorners(String message, Location loc1, Location loc2, Material type) {
 			player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
 			List<Location> locs = new ArrayList<>();
-			CuboidRegion region = new CuboidRegion(loc1, loc2).expand(1, 0, 1, 0, 1, 0);
+			CuboidRegion region = new CuboidRegion(loc1, loc2).expand(1, 0, 1000, 1000, 1, 0);
 			locs.add(new Location(loc1.getWorld(), loc1.getX(), 0, loc2.getZ()));
 			locs.add(new Location(loc1.getWorld(), loc2.getX(), 0, loc1.getZ()));
 			locs.forEach(l -> l.setY(l.getWorld().getHighestBlockYAt(l)));
@@ -234,7 +241,7 @@ public class ClaimTool implements Listener {
 				Block block = loc.getBlock();
 				for (BlockFace face : faces) {
 					Block rel = block.getRelative(face);
-					if (!region.contains(rel)) {
+					if (!region.contains(LocationUtils.center(rel))) {
 						continue;
 					}
 					rel = rel.getWorld().getHighestBlockAt(rel.getLocation());

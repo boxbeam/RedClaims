@@ -3,7 +3,6 @@ package redempt.redclaims;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -18,16 +17,12 @@ import redempt.redlib.commandmanager.CommandHook;
 import redempt.redlib.commandmanager.CommandParser;
 import redempt.redlib.commandmanager.ContextProvider;
 import redempt.redlib.commandmanager.Messages;
-import redempt.redlib.itemutils.ItemBuilder;
-import redempt.redlib.itemutils.ItemUtils;
+import redempt.redlib.misc.Task;
 import redempt.redlib.misc.UserCache;
 import redempt.redlib.region.CuboidRegion;
-import redempt.redlib.region.SelectionTool;
 
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class CommandListener {
@@ -112,8 +107,10 @@ public class CommandListener {
 		end.setY(end.getWorld().getMaxHeight());
 		selection = new CuboidRegion(start, end);
 		try {
-			plugin.getClaimStorage().createClaim(sender, name, selection).visualize(sender, false);
+			Claim claim = plugin.getClaimStorage().createClaim(sender, name, selection);
 			sender.sendMessage(Messages.msg("claimCreated"));
+			tool.clearSelection(sender.getUniqueId());
+			Task.syncDelayed(() -> claim.visualize(sender, true), 1);
 		} catch (IllegalArgumentException e) {
 			sender.sendMessage(Messages.msg("errorColor") + e.getMessage());
 		}
@@ -135,8 +132,9 @@ public class CommandListener {
 		}
 		try {
 			claim.createSubclaim(name, selection);
-			claim.visualize(sender, true);
 			sender.sendMessage(Messages.msg("subclaimCreated"));
+			tool.clearSelection(sender.getUniqueId());
+			Task.syncDelayed(() -> claim.visualize(sender, true), 1);
 		} catch (IllegalArgumentException e) {
 			sender.sendMessage(Messages.msg("errorColor") + e.getMessage());
 		}
