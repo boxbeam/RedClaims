@@ -90,7 +90,6 @@ public class ClaimTool implements Listener {
 	public void onHotbarSwap(PlayerChangedHeldItemEvent e) {
 		boolean cur = ItemUtils.compare(e.getNewItem(), item);
 		boolean prev = ItemUtils.compare(e.getPreviousItem(), item);
-		System.out.println(cur + " " + prev);
 		if (!cur && !prev) {
 			return;
 		}
