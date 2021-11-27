@@ -4,16 +4,15 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Monster;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import redempt.redclaims.RedClaims;
 import redempt.redlib.commandmanager.Messages;
@@ -88,6 +87,9 @@ public class MiscProtections implements Listener {
 			}
 		}
 		if (player == null) {
+			if (claim.flagApplies(loc, "animals")) {
+				e.setCancelled(true);
+			}
 			return;
 		}
 		if (claim.getRank(player).getRank() >= ClaimRank.MEMBER.getRank() && e.getEntityType() != EntityType.PLAYER) {
@@ -110,5 +112,37 @@ public class MiscProtections implements Listener {
 			return;
 		}
 	}
-	
+
+	@EventHandler
+	public void onEntityInteract(PlayerInteractEntityEvent e) {
+		Player player = e.getPlayer();
+		Claim claim = ClaimMap.getClaim(e.getRightClicked().getLocation());
+		if (claim == null || !claim.flagApplies(e.getRightClicked().getLocation(), "interact")) {
+			return;
+		}
+		if (!claim.hasAtLeast(player, ClaimRank.MEMBER)) {
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler
+	public void onHangingBreak(HangingBreakByEntityEvent e) {
+		if (!(e.getRemover() instanceof Player)) {
+			return;
+		}
+		Player player = (Player) e.getRemover();
+		Claim claim = ClaimMap.getClaim(e.getEntity().getLocation());
+		if (claim == null || !claim.flagApplies(e.getEntity().getLocation(), "animals")) {
+			return;
+		}
+		if (!claim.hasAtLeast(player, ClaimRank.MEMBER)) {
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler
+	public void onArmorStandInteract(PlayerArmorStandManipulateEvent e) {
+		onEntityInteract(e);
+	}
+
 }
