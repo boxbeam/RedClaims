@@ -5,13 +5,13 @@ claim,c claim:claim {
 		hook budget
 		context self
 	}
-	info {
+	info,i {
 		postarg
 		hook claimInfo
 		help Get info on a claim
 	}
-	info {
-		hook claimInfo
+	info,i --sub,-s {
+		hook claimInfoCtx
 		context currentClaim
 		help Get info on a claim
 	}
@@ -55,7 +55,6 @@ claim,c claim:claim {
 	}
 	sub subclaim:subclaim {
 		postarg
-
 		protection {
 			postarg
 			add flag[]:flags {
@@ -66,6 +65,11 @@ claim,c claim:claim {
 				hook removeSubclaimFlag
 				help Remove a protection flag from a subclaim
 			}
+		}
+		info,i {
+		    postarg
+		    hook subclaimInfo
+		    help Get info about a subclaim by name
 		}
 	}
 	sub string:name {

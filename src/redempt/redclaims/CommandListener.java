@@ -86,12 +86,13 @@ public class CommandListener {
 		
 		ContextProvider<CuboidRegion> selectionProvider = new ContextProvider<>("selection", Messages.msg("noSelection"), c -> tool.getSelection(c.getUniqueId()));
 		ContextProvider<Claim> currentClaimProvider = new ContextProvider<>("currentClaim", Messages.msg("notInClaim"), c -> ClaimMap.getClaim(c.getLocation()));
+		ContextProvider<Subclaim> currentSubclaimProvider = currentClaimProvider.map("currentSubclaim", Messages.msg("notInSubclaim"), (s, c) -> c.getSubclaim(s.getLocation()));
 		
 		tool = new ClaimTool(plugin, new ItemStack(plugin.getClaimToolMaterial()));
 		
 		new CommandParser(plugin.getResource("command.rdcml"))
 				.setArgTypes(claimType, subclaimType, flagType, userType, rankType)
-				.setContextProviders(selectionProvider, currentClaimProvider)
+				.setContextProviders(selectionProvider, currentClaimProvider, currentSubclaimProvider)
 				.parse().register("redclaims", this);
 	}
 	
@@ -159,23 +160,47 @@ public class CommandListener {
 		subclaim.removeFlag(flags);
 		sender.sendMessage(Messages.msg("protectionRemoved"));
 	}
-	
-	@CommandHook("claimInfo")
-	public void claimInfo(CommandSender sender, Claim claim) {
-		sender.sendMessage(Messages.msg("claimInfoHeader").replace("%name%", claim.getOwner().getName() + ":" + claim.getName()));
+
+	public void showClaimInfo(CommandSender sender, Claim claim, boolean showMembers) {
+		sender.sendMessage(Messages.msg("claimInfoHeader").replace("%name%", claim.getFullName()));
 		String primary = Messages.msg("primaryColor");
 		String secondary = Messages.msg("secondaryColor");
 		ClaimStorage storage = plugin.getClaimStorage();
 		sender.sendMessage(Messages.msg("claimBlocks").replace("%blocks%", storage.getClaimBlocks(claim) + ""));
 		sender.sendMessage(Messages.msg("claimFlags").replace("%flags%", claim.getFlags().stream().map(f -> secondary + f.getName()).collect(Collectors.joining(primary + ", "))));
-		sender.sendMessage(Messages.msg("claimMembers").replace("%members%", claim.getAllMembers().entrySet().stream()
-				.filter(e -> e.getValue() == ClaimRank.MEMBER)
-				.map(e -> secondary + Bukkit.getOfflinePlayer(e.getKey()).getName())
-				.collect(Collectors.joining(primary + ", "))));
-		sender.sendMessage(Messages.msg("claimTrusted").replace("%members%", claim.getAllMembers().entrySet().stream()
-				.filter(e -> e.getValue() == ClaimRank.TRUSTED)
-				.map(e -> secondary + Bukkit.getOfflinePlayer(e.getKey()).getName())
-				.collect(Collectors.joining(primary + ", "))));
+		if (showMembers) {
+			sender.sendMessage(Messages.msg("claimMembers").replace("%members%", claim.getAllMembers().entrySet().stream()
+					.filter(e -> e.getValue() == ClaimRank.MEMBER)
+					.map(e -> secondary + Bukkit.getOfflinePlayer(e.getKey()).getName())
+					.collect(Collectors.joining(primary + ", "))));
+			sender.sendMessage(Messages.msg("claimTrusted").replace("%members%", claim.getAllMembers().entrySet().stream()
+					.filter(e -> e.getValue() == ClaimRank.TRUSTED)
+					.map(e -> secondary + Bukkit.getOfflinePlayer(e.getKey()).getName())
+					.collect(Collectors.joining(primary + ", "))));
+		}
+	}
+
+	@CommandHook("claimInfo")
+	public void claimInfo(CommandSender sender, Claim claim) {
+		showClaimInfo(sender, claim, true);
+	}
+
+	@CommandHook("claimInfoCtx")
+	public void claimInfo(Player sender, boolean sub, Claim claim) {
+		if (sub) {
+			Subclaim subclaim = claim.getSubclaim(sender.getLocation());
+			if (subclaim == null) {
+				sender.sendMessage(Messages.msg("notInSubclaim"));
+				return;
+			}
+			claim = subclaim;
+		}
+		showClaimInfo(sender, claim, !sub);
+	}
+
+	@CommandHook("subclaimInfo")
+	public void subclaimInfo(CommandSender sender, Claim claim, Subclaim subclaim) {
+		showClaimInfo(sender, subclaim, false);
 	}
 	
 	@CommandHook("deleteClaim")

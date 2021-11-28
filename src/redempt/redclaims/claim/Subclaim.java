@@ -46,7 +46,12 @@ public class Subclaim extends Claim {
 	public CuboidRegion getRegion() {
 		return region;
 	}
-	
+
+	@Override
+	public String getFullName() {
+		return parent.getFullName() + ":" + getName();
+	}
+
 	@Override
 	public void initQuery() {
 		sql.execute("INSERT INTO claims VALUES(?, ?, ?, ?, ?);",

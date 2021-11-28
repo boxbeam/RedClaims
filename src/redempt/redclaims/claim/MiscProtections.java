@@ -14,13 +14,23 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.vehicle.VehicleDamageEvent;
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import redempt.redclaims.ClaimBypass;
 import redempt.redclaims.RedClaims;
 import redempt.redlib.commandmanager.Messages;
 
 import java.util.UUID;
 
 public class MiscProtections implements Listener {
-	
+
+	private static boolean hasAtLeast(Claim claim, Player player, ClaimRank rank) {
+		if (claim.getRank(player).getRank() >= rank.getRank()) {
+			return true;
+		}
+		return ClaimBypass.hasBypass(player.getUniqueId());
+	}
+
 	private RedClaims plugin;
 	
 	public MiscProtections(RedClaims plugin) {
@@ -60,7 +70,26 @@ public class MiscProtections implements Listener {
 			e.setCancelled(true);
 		}
 	}
-	
+
+	@EventHandler
+	public void onVehicleDamage(VehicleDestroyEvent e) {
+		if (e.getAttacker() == null) {
+			return;
+		}
+		Claim claim = ClaimMap.getClaim(e.getVehicle().getLocation());
+		if (claim == null || !claim.flagApplies(e.getVehicle().getLocation(), "animals")) {
+			return;
+		}
+		if (!(e.getAttacker() instanceof Player)) {
+			e.setCancelled(true);
+			return;
+		}
+		Player player = (Player) e.getAttacker();
+		if (!hasAtLeast(claim, player, ClaimRank.MEMBER)) {
+			e.setCancelled(true);
+		}
+	}
+
 	@EventHandler
 	public void onDamage(EntityDamageByEntityEvent e) {
 		if (e.getEntity() instanceof Monster) {
@@ -111,38 +140,6 @@ public class MiscProtections implements Listener {
 			e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(Messages.msg("exitingClaim")));
 			return;
 		}
-	}
-
-	@EventHandler
-	public void onEntityInteract(PlayerInteractEntityEvent e) {
-		Player player = e.getPlayer();
-		Claim claim = ClaimMap.getClaim(e.getRightClicked().getLocation());
-		if (claim == null || !claim.flagApplies(e.getRightClicked().getLocation(), "interact")) {
-			return;
-		}
-		if (!claim.hasAtLeast(player, ClaimRank.MEMBER)) {
-			e.setCancelled(true);
-		}
-	}
-
-	@EventHandler
-	public void onHangingBreak(HangingBreakByEntityEvent e) {
-		if (!(e.getRemover() instanceof Player)) {
-			return;
-		}
-		Player player = (Player) e.getRemover();
-		Claim claim = ClaimMap.getClaim(e.getEntity().getLocation());
-		if (claim == null || !claim.flagApplies(e.getEntity().getLocation(), "animals")) {
-			return;
-		}
-		if (!claim.hasAtLeast(player, ClaimRank.MEMBER)) {
-			e.setCancelled(true);
-		}
-	}
-
-	@EventHandler
-	public void onArmorStandInteract(PlayerArmorStandManipulateEvent e) {
-		onEntityInteract(e);
 	}
 
 }

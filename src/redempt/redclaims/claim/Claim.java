@@ -33,6 +33,7 @@ public class Claim {
 			ProtectionType.FLOW_IN,
 			ProtectionType.STRUCTURE_GROWTH_IN,
 			ProtectionType.PORTAL_PAIRING,
+			ProtectionType.DISPENSER_PLACE_IN,
 	};
 	
 	private ProtectedRegion region;
@@ -68,7 +69,15 @@ public class Claim {
 	public Subclaim getSubclaim(String name) {
 		return subclaims.stream().filter(s -> s.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
 	}
-	
+
+	public Subclaim getSubclaim(Location loc) {
+		return subclaims.stream().filter(s -> s.getRegion().contains(loc)).findFirst().orElse(null);
+	}
+
+	public String getFullName() {
+		return getOwner().getName() + ":" + name;
+	}
+
 	public void remove() {
 		ClaimMap.unregister(this);
 		if (region != null) {
@@ -135,7 +144,7 @@ public class Claim {
 		policy.addBypassPolicy((p, t) -> p != null && getRank(p).getRank() >= ClaimRank.MEMBER.getRank());
 		policy.addBypassPolicy((p, t) -> p != null && ClaimBypass.hasBypass(p.getUniqueId()));
 		policy.addBypassPolicy((p, t, b) -> subclaims.stream().anyMatch(c ->
-				c.getRegion().contains(b) && (!c.getFlags().contains(ClaimFlag.BY_TYPE.get(t)) || c.getRank(p).getRank() >= ClaimRank.MEMBER.getRank())));
+				c.getRegion().contains(b) && (!c.getFlags().contains(ClaimFlag.BY_TYPE.get(t)) || (p != null && c.getRank(p).getRank() >= ClaimRank.MEMBER.getRank()))));
 		flags.forEach(f -> policy.addProtectionTypes(f.getProtectionTypes()));
 	}
 	

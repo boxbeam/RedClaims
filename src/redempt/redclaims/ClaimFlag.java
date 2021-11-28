@@ -14,7 +14,7 @@ public class ClaimFlag {
 			new ClaimFlag(Material.DIAMOND_PICKAXE, "break-blocks", ProtectionType.BREAK_BLOCK, ProtectionType.USE_BUCKETS),
 			new ClaimFlag(Material.TNT, "explosions", ProtectionType.ENTITY_EXPLOSION, ProtectionType.BLOCK_EXPLOSION),
 			new ClaimFlag(Material.FLINT_AND_STEEL, "fire", ProtectionType.FIRE),
-			new ClaimFlag(Material.OAK_DOOR, "interact", ProtectionType.INTERACT),
+			new ClaimFlag(Material.OAK_DOOR, "interact", ProtectionType.INTERACT, ProtectionType.PLACE_ENTITY, ProtectionType.INTERACT_ENTITY),
 			new ClaimFlag(Material.CHEST, "containers", ProtectionType.CONTAINER_ACCESS),
 			new ClaimFlag(Material.DIAMOND_SWORD, "pvp"),
 			new ClaimFlag(Material.PORKCHOP, "animals")

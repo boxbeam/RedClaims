@@ -2,6 +2,7 @@ noSelection: &cYou do not have a region selected!
 errorColor: &c
 claimCreated: &aClaim created!
 notInClaim: &cYou are not in a claim!
+notInSubclaim: &cYou are not in a subclaim!
 claimDeleted: &aClaim deleted!
 notOwner: &cYou do not own this claim!
 protectionAdded: &aProtections added!
