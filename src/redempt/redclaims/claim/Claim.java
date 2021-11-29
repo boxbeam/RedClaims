@@ -9,9 +9,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import redempt.redclaims.ClaimBypass;
-import redempt.redclaims.ClaimFlag;
-import redempt.redclaims.RedClaims;
+import redempt.redclaims.*;
 import redempt.redlib.protection.ProtectedRegion;
 import redempt.redlib.protection.ProtectionPolicy;
 import redempt.redlib.protection.ProtectionPolicy.ProtectionType;
@@ -160,14 +158,12 @@ public class Claim {
 	private BlockFace[] FACES = {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
 	
 	public void visualize(Player player, boolean subclaims) {
-		visualize(player, subclaims, player::sendBlockChange);
+		BlockDisplayer displayer = ClaimVisualizer.getDisplayer(player);
+		visualize(player, subclaims, displayer);
+		displayer.show();
 	}
 	
-	public void unvisualize(Player player) {
-		visualize(player, true, (l, b) -> player.sendBlockChange(l, l.getBlock().getBlockData()));
-	}
-	
-	protected void visualize(Player player, boolean subclaims, BiConsumer<Location, BlockData> updater) {
+	protected void visualize(Player player, boolean subclaims, BlockDisplayer displayer) {
 		CuboidRegion region = getRegion();
 		Location[] corners = region.clone().expand(-1, 0, -1, 0, -1, 0).getCorners();
 		List<Location> locations = new ArrayList<>();
@@ -175,13 +171,13 @@ public class Claim {
 		locations.removeIf(l -> l.getBlockY() == region.getEnd().getBlockY());
 		for (Location location : locations) {
 			Location loc = raise(location);
-			updater.accept(loc, Material.SHROOMLIGHT.createBlockData());
+			displayer.display(loc.getBlock(), Material.SHROOMLIGHT);
 			for (BlockFace face : FACES) {
 				Block rel = loc.getBlock().getRelative(face);
 				if (!region.contains(rel)) {
 					continue;
 				}
-				updater.accept(raise(rel.getLocation()), Material.WAXED_OXIDIZED_CUT_COPPER.createBlockData());
+				displayer.display(raise(rel.getLocation()).getBlock(), Material.WAXED_OXIDIZED_CUT_COPPER);
 			}
 		}
 		corners = new Location[] {region.getStart(), region.getEnd().subtract(1, 1, 1)};
@@ -194,13 +190,13 @@ public class Claim {
 				Vector v = face.getDirection().multiply(5);
 				Location loc = start.clone().add(v);
 				while (region.contains(loc.clone().add(face.getDirection()))) {
-					updater.accept(raise(loc), Material.WAXED_OXIDIZED_CUT_COPPER.createBlockData());
+					displayer.display(raise(loc).getBlock(), Material.WAXED_OXIDIZED_CUT_COPPER);
 					loc = loc.add(v);
 				}
 			}
 		}
 		if (subclaims) {
-			this.subclaims.forEach(s -> s.visualize(player, false, updater));
+			this.subclaims.forEach(s -> s.visualize(player, false, displayer));
 		}
 	}
 	

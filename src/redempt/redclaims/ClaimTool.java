@@ -101,7 +101,7 @@ public class ClaimTool implements Listener {
 			claim.visualize(e.getPlayer(), false);
 			return;
 		}
-		claim.unvisualize(e.getPlayer());
+		ClaimVisualizer.getDisplayer(e.getPlayer()).clear();
 	}
 	
 	@EventHandler
@@ -115,7 +115,7 @@ public class ClaimTool implements Listener {
 			return;
 		}
 		if (to == null) {
-			from.unvisualize(e.getPlayer());
+			ClaimVisualizer.getDisplayer(e.getPlayer()).clear();
 			return;
 		}
 		to.visualize(e.getPlayer(), false);

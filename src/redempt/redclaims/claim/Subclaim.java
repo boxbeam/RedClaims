@@ -7,6 +7,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import redempt.redclaims.BlockDisplayer;
 import redempt.redclaims.ClaimFlag;
 import redempt.redlib.misc.LocationUtils;
 import redempt.redlib.region.CuboidRegion;
@@ -59,17 +60,17 @@ public class Subclaim extends Claim {
 	}
 	
 	@Override
-	protected void visualize(Player player, boolean subclaims, BiConsumer<Location, BlockData> updater) {
+	protected void visualize(Player player, boolean subclaims, BlockDisplayer displayer) {
 		CuboidRegion region = getRegion();
 		Location[] corners = region.clone().expand(-1, 0, -1, 0, -1, 0).getCorners();
 		for (Location corner : corners) {
-			updater.accept(corner, Material.SEA_LANTERN.createBlockData());
+			displayer.display(corner.getBlock(), Material.SEA_LANTERN);
 			for (BlockFace face : LocationUtils.PRIMARY_BLOCK_FACES) {
 				Block rel = corner.getBlock().getRelative(face);
 				if (!region.contains(rel)) {
 					continue;
 				}
-				updater.accept(rel.getLocation(), Material.END_STONE_BRICKS.createBlockData());
+				displayer.display(rel.getLocation().getBlock(), Material.END_STONE_BRICKS);
 			}
 		}
 	}

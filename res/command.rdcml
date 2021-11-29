@@ -50,7 +50,6 @@ claim,c claim:claim {
 	unvisualize,uv {
 		help Removes visualization of the boundaries of the claim you're in
 		hook unvisualize
-		context currentClaim
 		user player
 	}
 	sub subclaim:subclaim {

@@ -209,6 +209,7 @@ public class CommandListener {
 			sender.sendMessage(Messages.msg("notOwner"));
 			return;
 		}
+		claim.getRegion().getPlayers().forEach(p -> ClaimVisualizer.getDisplayer(p).clear());
 		plugin.getClaimStorage().deleteClaim(claim);
 		sender.sendMessage(Messages.msg("claimDeleted"));
 	}
@@ -290,8 +291,8 @@ public class CommandListener {
 	}
 	
 	@CommandHook("unvisualize")
-	public void unvisualize(Player player, Claim claim) {
-		claim.unvisualize(player);
+	public void unvisualize(Player player) {
+		ClaimVisualizer.getDisplayer(player).clear();
 	}
 	
 	@CommandHook("budget")
