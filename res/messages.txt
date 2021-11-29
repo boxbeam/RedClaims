@@ -24,6 +24,7 @@ enteringClaim: &a%player%'s claim %claim%
 exitingClaim: &aWilderness
 subclaimCreated: &aSubclaim created!
 subclaimTooSmall: &cA subclaim must be at least 3x3x3!
+subclaimOutsideParent: &cThis subclaim is not fully contained in its parent claim!
 firstCornerSelected: &aFirst corner selected!
 secondCornerSelected: &aSecond corner selected!
 claimOverlap: &cThis claim would overlap an existing claim!

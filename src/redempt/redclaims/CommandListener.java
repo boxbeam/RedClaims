@@ -20,6 +20,7 @@ import redempt.redlib.commandmanager.Messages;
 import redempt.redlib.misc.Task;
 import redempt.redlib.misc.UserCache;
 import redempt.redlib.region.CuboidRegion;
+import redempt.redlib.region.Region;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -129,6 +130,11 @@ public class CommandListener {
 		}
 		if (Arrays.stream(selection.getBlockDimensions()).anyMatch(i -> i < 3)) {
 			sender.sendMessage(Messages.msg("subclaimTooSmall"));
+			return;
+		}
+		Region intersect = selection.getIntersection(claim.getRegion());
+		if (intersect == null || intersect.getBlockVolume() < selection.getBlockVolume()) {
+			sender.sendMessage(Messages.msg("subclaimOutsideParent"));
 			return;
 		}
 		try {
