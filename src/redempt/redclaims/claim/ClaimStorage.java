@@ -72,7 +72,10 @@ public class ClaimStorage {
 			UUID id = UUID.fromString(r.getString(1));
 			String name = r.getString(2);
 			String parent = r.getString(3);
-			Set<ClaimFlag> flags = Arrays.stream(r.getString(4).split(",")).map(ClaimFlag.BY_NAME::get).collect(Collectors.toCollection(LinkedHashSet::new));
+			Set<ClaimFlag> flags = Arrays.stream(r.getString(4).split(","))
+				.filter(s -> s.length() != 0)
+				.map(ClaimFlag.BY_NAME::get)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 			CuboidRegion region = CuboidRegion.fromString(r.getString(5));
 			if (parent != null) {
 				Subclaim sub = new Subclaim(sql, name, region, id, flags);
