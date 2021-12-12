@@ -115,7 +115,7 @@ public class MiscProtections implements Listener {
 				player = (Player) proj.getShooter();
 			}
 		}
-		if (player == null) {
+		if (player == null && e.getEntity() instanceof Animals) {
 			if (claim.flagApplies(loc, "animals")) {
 				e.setCancelled(true);
 			}
