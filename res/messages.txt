@@ -35,3 +35,6 @@ subclaimTooSmallTool: &cSubclaim too small: %dims%
 subclaimOverlaps: &cSubclaim overlaps existing subclaims
 subclaimValid: &aSubclaim is valid
 claimBudget: &aClaim budget: &e%budget%
+claimResized: &aClaim resized!
+subclaimDeleted: &aSubclaim deleted!
+subclaimResized: &aSubclaim resized!

@@ -129,7 +129,7 @@ public class Claim {
 		return getRank(player).getRank() >= rank.getRank();
 	}
 	
-	public void updateRegion(CuboidRegion region) {
+	protected void updateRegion(CuboidRegion region) {
 		if (this instanceof Subclaim) {
 			return;
 		}
@@ -144,6 +144,12 @@ public class Claim {
 		policy.addBypassPolicy((p, t, b) -> subclaims.stream().anyMatch(c ->
 				c.getRegion().contains(b) && (!c.getFlags().contains(ClaimFlag.BY_TYPE.get(t)) || (p != null && c.getRank(p).getRank() >= ClaimRank.MEMBER.getRank()))));
 		flags.forEach(f -> policy.addProtectionTypes(f.getProtectionTypes()));
+	}
+	
+	public void setRegion(CuboidRegion region) {
+		updateRegion(region);
+		subclaims.stream().filter(s -> !isFullyContained(s.getRegion())).collect(Collectors.toList()).forEach(this::removeSubclaim);
+		sql.execute("UPDATE claims SET region=? WHERE name=? AND owner=? AND parent IS NULL;", region.toString(), name, owner.toString());
 	}
 	
 	public void initQuery() {
@@ -277,6 +283,19 @@ public class Claim {
 		subclaims.add(subclaim);
 		subclaim.initQuery();
 		return subclaim;
+	}
+	
+	public void removeSubclaim(Subclaim subclaim) {
+		if (!subclaim.getParent().equals(this)) {
+			throw new IllegalArgumentException("The given subclaim does not belong to this claim");
+		}
+		subclaims.remove(subclaim);
+		sql.execute("DELETE FROM claims WHERE name=? AND owner=? AND parent=?;", subclaim.getName(), owner.toString(), name);
+	}
+	
+	public boolean isFullyContained(CuboidRegion region) {
+		Region overlap = getRegion().getIntersection(region);
+		return overlap != null && overlap.getBlockVolume() == region.getBlockVolume();
 	}
 	
 	public ProtectedRegion getProtectedRegion() {

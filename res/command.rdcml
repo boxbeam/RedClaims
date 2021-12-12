@@ -41,6 +41,12 @@ claim,c claim:claim {
 		help Renames a claim
 		hook renameClaim
 	}
+	resize {
+		postarg
+		help Resizes a claim to your current selection
+		hook resizeClaim
+		context selection
+	}
 	visualize,v {
 		help Visualize the boundaries of the claim you are currently in
 		hook visualize
@@ -70,6 +76,17 @@ claim,c claim:claim {
 		    hook subclaimInfo
 		    help Get info about a subclaim by name
 		}
+		delete {
+			postarg
+			hook deleteSubclaim
+			help Deletes a subclaim
+		}
+		resize {
+			postarg
+			hook resizeSubclaim
+			help Resizes a subclaim to your selection
+			context selection
+		}
 	}
 	sub string:name {
 		postarg
@@ -86,7 +103,7 @@ claim,c string:name {
 	create {
 		postarg
 		hook createClaim
-		help Create a claim from your selection
+		help Create a claim to your selection
 		permission redclaims.create
 		context selection
 		user player

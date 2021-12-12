@@ -24,7 +24,9 @@ import redempt.redlib.region.Region;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class CommandListener {
 	
@@ -97,25 +99,56 @@ public class CommandListener {
 				.parse().register("redclaims", this);
 	}
 	
-	@CommandHook("createClaim")
-	public void createClaim(Player sender, String name, CuboidRegion selection) {
-		if (name.length() > 16) {
-			sender.sendMessage(Messages.msg("claimNameTooLong"));
-			return;
-		}
-		Location start = selection.getStart();
-		Location end = selection.getEnd();
+	private CuboidRegion expandVert(CuboidRegion region) {
+		Location start = region.getStart();
+		Location end = region.getEnd();
 		start.setY(end.getWorld().getMinHeight());
 		end.setY(end.getWorld().getMaxHeight());
-		selection = new CuboidRegion(start, end);
-		try {
-			Claim claim = plugin.getClaimStorage().createClaim(sender, name, selection);
-			sender.sendMessage(Messages.msg("claimCreated"));
-			tool.clearSelection(sender.getUniqueId());
-			Task.syncDelayed(() -> claim.visualize(sender, true), 1);
-		} catch (IllegalArgumentException e) {
-			sender.sendMessage(Messages.msg("errorColor") + e.getMessage());
+		return new CuboidRegion(start, end);
+	}
+	
+	private String createClaim(Player sender, String name, CuboidRegion selection, boolean dummy) {
+		if (name.length() > 16) {
+			return Messages.msg("claimNameTooLong");
 		}
+		selection = expandVert(selection);
+		try {
+			Claim claim = plugin.getClaimStorage().createClaim(sender, name, selection, dummy);
+			tool.clearSelection(sender.getUniqueId());
+			if (!dummy) {
+				Task.syncDelayed(() -> claim.visualize(sender, true), 1);
+			}
+			return null;
+		} catch (IllegalArgumentException e) {
+			return e.getMessage();
+		}
+	}
+	
+	@CommandHook("createClaim")
+	public void createClaim(Player sender, String name, CuboidRegion selection) {
+		String err = createClaim(sender, name, selection, false);
+		sender.sendMessage(err == null ? Messages.msg("claimCreated") : ChatColor.RED + err);
+	}
+	
+	@CommandHook("resizeClaim")
+	public void resizeClaim(Player sender, Claim claim, CuboidRegion selection) {
+		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
+			sender.sendMessage(Messages.msg("notOwner"));
+			return;
+		}
+		ClaimStorage storage = plugin.getClaimStorage();
+		storage.unregister(claim);
+		selection = expandVert(selection);
+		String err = createClaim(sender, claim.getName(), selection, true);
+		storage.register(claim);
+		if (err != null) {
+			sender.sendMessage(ChatColor.RED + err);
+			return;
+		}
+		claim.setRegion(selection);
+		sender.sendMessage(Messages.msg("claimResized"));
+		Task.syncDelayed(() -> claim.visualize(sender, false), 1);
+		tool.clearSelection(sender.getUniqueId());
 	}
 	
 	@CommandHook("createSubclaim")
@@ -145,6 +178,40 @@ public class CommandListener {
 		} catch (IllegalArgumentException e) {
 			sender.sendMessage(Messages.msg("errorColor") + e.getMessage());
 		}
+	}
+	
+	@CommandHook("deleteSubclaim")
+	public void deleteSubclaim(CommandSender sender, Claim claim, Subclaim subclaim) {
+		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
+			sender.sendMessage(Messages.msg("notOwner"));
+			return;
+		}
+		claim.removeSubclaim(subclaim);
+		sender.sendMessage(Messages.msg("subclaimDeleted"));
+	}
+	
+	@CommandHook("resizeSubclaim")
+	public void resizeSubclaim(Player sender, Claim claim, Subclaim subclaim, CuboidRegion selection) {
+		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
+			sender.sendMessage(Messages.msg("notOwner"));
+			return;
+		}
+		if (IntStream.of(selection.getBlockDimensions()).anyMatch(i -> i < 3)) {
+			sender.sendMessage(Messages.msg("subclaimTooSmall"));
+			return;
+		}
+		if (!claim.isFullyContained(selection)) {
+			sender.sendMessage(Messages.msg("subclaimOutsideParent"));
+			return;
+		}
+		if (claim.getSubclaims().stream().filter(s -> !s.equals(subclaim)).anyMatch(s -> s.getRegion().overlaps(selection))) {
+			sender.sendMessage(Messages.msg("subclaimOverlaps"));
+			return;
+		}
+		subclaim.setRegion(selection);
+		tool.clearSelection(sender.getUniqueId());
+		Task.syncDelayed(() -> claim.visualize(sender, true), 1);
+		sender.sendMessage(Messages.msg("subclaimResized"));
 	}
 	
 	@CommandHook("addSubclaimFlag")

@@ -43,8 +43,21 @@ public class ClaimStorage {
 		return owned.get(name.toLowerCase());
 	}
 	
+	public void unregister(Claim claim) {
+		ClaimMap.unregister(claim);
+		claims.get(claim.getOwner().getUniqueId()).remove(claim.getName().toLowerCase());
+	}
+	
+	public void register(Claim claim) {
+		ClaimMap.register(claim);
+		claims.get(claim.getOwner().getUniqueId()).put(claim.getName().toLowerCase(), claim);
+	}
+	
 	public int getClaimBlocks(Claim claim) {
-		CuboidRegion region = claim.getRegion();
+		return getClaimBlocks(claim.getRegion());
+	}
+	
+	public int getClaimBlocks(CuboidRegion region) {
 		int[] dim = region.getBlockDimensions();
 		return dim[0] * dim[2];
 	}
@@ -100,7 +113,7 @@ public class ClaimStorage {
 		});
 	}
 	
-	public Claim createClaim(Player owner, String name, CuboidRegion region) {
+	public Claim createClaim(Player owner, String name, CuboidRegion region, boolean dummy) {
 		int[] dim = region.getBlockDimensions();
 		if (dim[0] < 10 || dim[2] < 10) {
 			throw new IllegalArgumentException("Claim is too small, must be at least 10x10");
@@ -115,10 +128,13 @@ public class ClaimStorage {
 		if (getClaim(owner.getUniqueId(), name) != null) {
 			throw new IllegalArgumentException("Player has already created a claim with that name");
 		}
-		Claim claim = new Claim(sql, name, region, owner.getUniqueId());
-		claim.initQuery();
-		claims.computeIfAbsent(owner.getUniqueId(), k -> new HashMap<>()).put(name.toLowerCase(), claim);
-		return claim;
+		if (!dummy) {
+			Claim claim = new Claim(sql, name, region, owner.getUniqueId());
+			claim.initQuery();
+			claims.computeIfAbsent(owner.getUniqueId(), k -> new HashMap<>()).put(name.toLowerCase(), claim);
+			return claim;
+		}
+		return null;
 	}
 	
 	public void renameClaim(Claim claim, String name) {

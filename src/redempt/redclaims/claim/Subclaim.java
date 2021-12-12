@@ -52,7 +52,13 @@ public class Subclaim extends Claim {
 	public String getFullName() {
 		return parent.getFullName() + ":" + getName();
 	}
-
+	
+	@Override
+	public void setRegion(CuboidRegion region) {
+		this.region = region;
+		sql.execute("UPDATE claims SET region=? WHERE name=? AND owner=? AND parent=?;", region.toString(), getName(), getOwner().getUniqueId().toString(), parent.getName());
+	}
+	
 	@Override
 	public void initQuery() {
 		sql.execute("INSERT INTO claims VALUES(?, ?, ?, ?, ?);",
