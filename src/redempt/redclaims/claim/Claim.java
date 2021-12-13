@@ -32,6 +32,7 @@ public class Claim {
 			ProtectionType.STRUCTURE_GROWTH_IN,
 			ProtectionType.PORTAL_PAIRING,
 			ProtectionType.DISPENSER_PLACE_IN,
+			ProtectionType.TRAMPLE
 	};
 	
 	private ProtectedRegion region;
