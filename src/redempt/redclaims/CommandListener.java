@@ -130,6 +130,14 @@ public class CommandListener {
 		sender.sendMessage(err == null ? Messages.msg("claimCreated") : ChatColor.RED + err);
 	}
 	
+	@CommandHook("tp")
+	public void tp(Player player, Claim claim) {
+		Region region = claim.getRegion();
+		Location loc = region.getCenter();
+		loc.setY(loc.getWorld().getHighestBlockYAt(loc));
+		player.teleport(loc);
+	}
+	
 	@CommandHook("resizeClaim")
 	public void resizeClaim(Player sender, Claim claim, CuboidRegion selection) {
 		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {

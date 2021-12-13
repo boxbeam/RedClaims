@@ -20,6 +20,7 @@ import redempt.redclaims.claim.Claim;
 import redempt.redclaims.claim.ClaimMap;
 import redempt.redlib.commandmanager.Messages;
 import redempt.redlib.enchants.events.PlayerChangedHeldItemEvent;
+import redempt.redlib.itemutils.ItemTrait;
 import redempt.redlib.itemutils.ItemUtils;
 import redempt.redlib.misc.LocationUtils;
 import redempt.redlib.misc.Task;

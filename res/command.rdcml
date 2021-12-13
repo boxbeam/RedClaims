@@ -58,6 +58,12 @@ claim,c claim:claim {
 		hook unvisualize
 		user player
 	}
+	tp {
+		postarg
+		permission redclaims.admin
+		user player
+		hook tp
+	}
 	sub subclaim:subclaim {
 		postarg
 		protection {

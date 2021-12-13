@@ -44,6 +44,7 @@ public class RedClaims extends JavaPlugin implements Listener {
 		new MiscProtections(this);
 		new ConfigManager(this).register(this).saveDefaults().load();
 		ClaimLimits.init(this, defaultClaimBlocks);
+		ClaimVisualizer.init();
 	}
 	
 	public Material getClaimToolMaterial() {
