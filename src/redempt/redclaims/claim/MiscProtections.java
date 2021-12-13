@@ -121,7 +121,7 @@ public class MiscProtections implements Listener {
 			}
 			return;
 		}
-		if (claim.getRank(player).getRank() >= ClaimRank.MEMBER.getRank() && e.getEntityType() != EntityType.PLAYER) {
+		if (player != null && claim.getRank(player).getRank() >= ClaimRank.MEMBER.getRank() && e.getEntityType() != EntityType.PLAYER) {
 			return;
 		}
 		e.setCancelled(true);
