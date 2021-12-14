@@ -4,23 +4,31 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.LingeringPotionSplashEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.projectiles.BlockProjectileSource;
+import org.bukkit.projectiles.ProjectileSource;
+import org.bukkit.util.BoundingBox;
 import redempt.redclaims.ClaimBypass;
 import redempt.redclaims.RedClaims;
 import redempt.redlib.commandmanager.Messages;
+import redempt.redlib.region.CuboidRegion;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class MiscProtections implements Listener {
 
@@ -30,7 +38,18 @@ public class MiscProtections implements Listener {
 		}
 		return ClaimBypass.hasBypass(player.getUniqueId());
 	}
-
+	
+	private static Player getPlayer(Entity entity) {
+		if (entity instanceof Player) {
+			return (Player) entity;
+		}
+		if (!(entity instanceof Projectile)) {
+			return null;
+		}
+		Projectile proj = (Projectile) entity;
+		return proj.getShooter() instanceof Player ? (Player) proj.getShooter() : null;
+	}
+	
 	private RedClaims plugin;
 	
 	public MiscProtections(RedClaims plugin) {
@@ -92,39 +111,86 @@ public class MiscProtections implements Listener {
 
 	@EventHandler
 	public void onDamage(EntityDamageByEntityEvent e) {
-		if (e.getEntity() instanceof Monster) {
+		if (e.getEntity() instanceof Monster && e.getEntity().getCustomName() == null) {
 			return;
 		}
 		Claim claim = ClaimMap.getClaim(e.getEntity().getLocation());
 		if (claim == null) {
 			return;
 		}
-		Location loc = e.getEntity().getLocation();
-		if ((e.getEntityType() == EntityType.PLAYER && !claim.flagApplies(loc, "pvp"))
-				|| (e.getEntityType() != EntityType.PLAYER && !claim.flagApplies(loc, "animals"))) {
-			return;
-		}
-		Entity damager = e.getDamager();
-		Player player = null;
-		if (damager instanceof Player) {
-			player = (Player) damager;
-		}
-		if (damager instanceof Projectile) {
-			Projectile proj = (Projectile) damager;
-			if (proj.getShooter() instanceof Player) {
-				player = (Player) proj.getShooter();
+		Player player = getPlayer(e.getDamager());
+		if (player != null && e.getEntity() instanceof Player) {
+			if (claim.flagApplies(e.getEntity().getLocation(), "pvp")) {
+				e.setCancelled(true);
+				return;
 			}
 		}
-		if (player == null && e.getEntity() instanceof Animals) {
-			if (claim.flagApplies(loc, "animals")) {
+		if (!claim.flagApplies(e.getEntity().getLocation(), "animals")) {
+			return;
+		}
+		if (e.getDamager() instanceof Projectile) {
+			ProjectileSource shooter = ((Projectile) e.getDamager()).getShooter();
+			Claim shooterClaim = ClaimMap.getClaim(getLocation(shooter));
+			if (canDamage(shooter, shooterClaim, e.getEntity().getLocation())) {
+				return;
+			}
+		}
+		if (player == null && !(e.getEntity() instanceof Player)) {
+			e.setCancelled(true);
+			return;
+		}
+		if (player != null && !hasAtLeast(claim, player, ClaimRank.MEMBER)) {
+			e.setCancelled(true);
+		}
+	}
+	
+	@EventHandler
+	public void onPotionSplash(PotionSplashEvent e) {
+		ProjectileSource shooter = e.getEntity().getShooter();
+		Claim claim = ClaimMap.getClaim(getLocation(shooter));
+		e.getAffectedEntities().forEach(en -> {
+			if (en.equals(shooter)) return;
+			if (!canDamage(shooter, claim, en.getLocation())) {
+				e.setIntensity(en, 0);
+			}
+		});
+	}
+	
+	@EventHandler
+	public void onLingeringPotionSplash(LingeringPotionSplashEvent e) {
+		ProjectileSource shooter = e.getEntity().getShooter();
+		Claim claim = ClaimMap.getClaim(getLocation(shooter));
+		AreaEffectCloud cloud = e.getAreaEffectCloud();
+		double r = cloud.getRadius();
+		Location min = cloud.getLocation().subtract(r, r, r);
+		Location max = cloud.getLocation().add(r, r, r);
+		Stream.of(new CuboidRegion(min, max).getCorners()).forEach(l -> {
+			if (!canDamage(shooter, claim, l)) {
 				e.setCancelled(true);
 			}
-			return;
+		});
+	}
+	
+	private Location getLocation(ProjectileSource source) {
+		if (source instanceof BlockProjectileSource) {
+			return ((BlockProjectileSource) source).getBlock().getLocation();
 		}
-		if (player != null && claim.getRank(player).getRank() >= ClaimRank.MEMBER.getRank() && e.getEntityType() != EntityType.PLAYER) {
-			return;
+		if (source instanceof Entity) {
+			return ((Entity) source).getLocation();
 		}
-		e.setCancelled(true);
+		return null;
+	}
+	
+	private boolean canDamage(ProjectileSource source, Claim claim, Location loc) {
+		Claim insideClaim = ClaimMap.getClaim(loc);
+		if (insideClaim == null) {
+			return true;
+		}
+		if (source instanceof Player) {
+			return hasAtLeast(insideClaim, (Player) source, ClaimRank.MEMBER);
+		}
+		System.out.println("Non-player");
+		return insideClaim.equals(claim);
 	}
 	
 	@EventHandler

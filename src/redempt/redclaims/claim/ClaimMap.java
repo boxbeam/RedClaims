@@ -33,6 +33,9 @@ public class ClaimMap {
 	}
 	
 	public static Claim getClaim(Location loc) {
+		if (loc == null) {
+			return null;
+		}
 		return claims.get(loc).stream().filter(c -> c.getRegion().contains(loc)).findFirst().orElse(null);
 	}
 	
