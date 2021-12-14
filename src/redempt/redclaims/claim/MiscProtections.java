@@ -189,7 +189,6 @@ public class MiscProtections implements Listener {
 		if (source instanceof Player) {
 			return hasAtLeast(insideClaim, (Player) source, ClaimRank.MEMBER);
 		}
-		System.out.println("Non-player");
 		return insideClaim.equals(claim);
 	}
 	
