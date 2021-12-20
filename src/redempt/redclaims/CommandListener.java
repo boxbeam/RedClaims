@@ -7,6 +7,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import redempt.redclaims.RedClaims.RedClaimsConfig;
 import redempt.redclaims.claim.Claim;
 import redempt.redclaims.claim.ClaimMap;
 import redempt.redclaims.claim.ClaimRank;
@@ -91,7 +92,7 @@ public class CommandListener {
 		ContextProvider<Claim> currentClaimProvider = new ContextProvider<>("currentClaim", Messages.msg("notInClaim"), c -> ClaimMap.getClaim(c.getLocation()));
 		ContextProvider<Subclaim> currentSubclaimProvider = currentClaimProvider.map("currentSubclaim", Messages.msg("notInSubclaim"), (s, c) -> c.getSubclaim(s.getLocation()));
 		
-		tool = new ClaimTool(plugin, new ItemStack(plugin.getClaimToolMaterial()));
+		tool = new ClaimTool(plugin, new ItemStack(RedClaims.getInstance().config().claimTool()));
 		
 		new CommandParser(plugin.getResource("command.rdcml"))
 				.setArgTypes(claimType, subclaimType, flagType, userType, rankType)

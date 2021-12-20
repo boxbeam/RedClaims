@@ -2,8 +2,8 @@ plugins {
 	id "java"
 	id "idea"
 }
-targetCompatibility = 1.8
-sourceCompatibility = 1.8
+targetCompatibility = 16
+sourceCompatibility = 16
 repositories {
 	mavenCentral()
 	maven {
@@ -24,7 +24,7 @@ repositories {
 }
 dependencies {
 	compileOnly "org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT"
-	compileOnly "com.github.Redempt:RedLib:6.2.1.7"
+	compileOnly "com.github.Redempt:RedLib:6.3"
 }
 sourceSets {
 	main {

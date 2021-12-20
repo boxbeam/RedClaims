@@ -4,13 +4,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import redempt.redclaims.claim.ClaimStorage;
 import redempt.redclaims.claim.MiscProtections;
-import redempt.redlib.commandmanager.CommandParser;
 import redempt.redlib.commandmanager.Messages;
-import redempt.redlib.configmanager.ConfigManager;
-import redempt.redlib.configmanager.annotations.ConfigValue;
+import redempt.redlib.config.ConfigManager;
 import redempt.redlib.misc.UserCache;
 
 import java.nio.file.Path;
@@ -25,10 +22,8 @@ public class RedClaims extends JavaPlugin implements Listener {
 	
 	private ClaimStorage storage;
 	
-	@ConfigValue
-	private int defaultClaimBlocks = 1000;
-	@ConfigValue
-	private Material claimTool = Material.GOLDEN_SHOVEL;
+	public static record RedClaimsConfig (int defaultClaimBlocks, Material claimTool) {}
+	private static RedClaimsConfig config;
 	
 	@Override
 	public void onEnable() {
@@ -42,13 +37,13 @@ public class RedClaims extends JavaPlugin implements Listener {
 		Messages.load(this);
 		new CommandListener(this).register();
 		new MiscProtections(this);
-		new ConfigManager(this).register(this).saveDefaults().load();
-		ClaimLimits.init(this, defaultClaimBlocks);
+		ConfigManager.create(this).target(new RedClaimsConfig(1000, Material.GOLDEN_SHOVEL)).saveDefaults().load();
+		ClaimLimits.init(this, config().defaultClaimBlocks());
 		ClaimVisualizer.init();
 	}
 	
-	public Material getClaimToolMaterial() {
-		return claimTool;
+	public RedClaimsConfig config() {
+		return config;
 	}
 	
 	@Override
