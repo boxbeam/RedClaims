@@ -22,7 +22,6 @@ public class RedClaims extends JavaPlugin implements Listener {
 	
 	private ClaimStorage storage;
 	
-	public static record RedClaimsConfig (int defaultClaimBlocks, Material claimTool) {}
 	private static RedClaimsConfig config;
 	
 	@Override
@@ -37,7 +36,7 @@ public class RedClaims extends JavaPlugin implements Listener {
 		Messages.load(this);
 		new CommandListener(this).register();
 		new MiscProtections(this);
-		ConfigManager.create(this).target(new RedClaimsConfig(1000, Material.GOLDEN_SHOVEL)).saveDefaults().load();
+		ConfigManager.create(this).target(new RedClaimsConfig()).saveDefaults().load();
 		ClaimLimits.init(this, config().defaultClaimBlocks());
 		ClaimVisualizer.init();
 	}

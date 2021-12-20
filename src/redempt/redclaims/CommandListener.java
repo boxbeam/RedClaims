@@ -7,7 +7,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import redempt.redclaims.RedClaims.RedClaimsConfig;
 import redempt.redclaims.claim.Claim;
 import redempt.redclaims.claim.ClaimMap;
 import redempt.redclaims.claim.ClaimRank;
