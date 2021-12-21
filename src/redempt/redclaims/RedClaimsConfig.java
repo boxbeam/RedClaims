@@ -1,7 +1,9 @@
 package redempt.redclaims;
 
 import org.bukkit.Material;
+import redempt.redlib.config.annotations.ConfigMappable;
 
+@ConfigMappable
 public class RedClaimsConfig {
 
 	private int defaultClaimBlocks = 1000;

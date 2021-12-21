@@ -22,7 +22,7 @@ public class RedClaims extends JavaPlugin implements Listener {
 	
 	private ClaimStorage storage;
 	
-	private static RedClaimsConfig config;
+	private static RedClaimsConfig config = new RedClaimsConfig();
 	
 	@Override
 	public void onEnable() {
