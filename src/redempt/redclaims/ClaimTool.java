@@ -39,11 +39,13 @@ public class ClaimTool implements Listener {
 	private ItemStack item;
 	private Map<UUID, Location[]> selections = new HashMap<>();
 	private RedClaims plugin;
+	private Messages messages;
 	
 	public ClaimTool(RedClaims plugin, ItemStack item) {
 		this.item = item;
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 		this.plugin = plugin;
+		messages = Messages.getLoaded(plugin);
 	}
 	
 	@EventHandler
@@ -52,7 +54,7 @@ public class ClaimTool implements Listener {
 			return;
 		}
 		ItemStack item = e.getItem();
-		if (!ItemUtils.compare(item, this.item)) {
+		if (!ItemUtils.compare(item, this.item, ItemTrait.TYPE)) {
 			return;
 		}
 		e.setCancelled(true);
@@ -67,12 +69,12 @@ public class ClaimTool implements Listener {
 		}
 		if (locs[0] == null) {
 			locs[0] = loc;
-			e.getPlayer().sendMessage(Messages.msg("firstCornerSelected"));
+			e.getPlayer().sendMessage(messages.get("firstCornerSelected"));
 			new ClaimHelper(e.getPlayer());
 			return;
 		}
 		locs[1] = loc;
-		e.getPlayer().sendMessage(Messages.msg("secondCornerSelected"));
+		e.getPlayer().sendMessage(messages.get("secondCornerSelected"));
 	}
 	
 	public CuboidRegion getSelection(UUID id) {
@@ -89,8 +91,8 @@ public class ClaimTool implements Listener {
 	
 	@EventHandler
 	public void onHotbarSwap(PlayerChangedHeldItemEvent e) {
-		boolean cur = ItemUtils.compare(e.getNewItem(), item);
-		boolean prev = ItemUtils.compare(e.getPreviousItem(), item);
+		boolean cur = ItemUtils.compare(e.getNewItem(), item, ItemTrait.TYPE);
+		boolean prev = ItemUtils.compare(e.getPreviousItem(), item, ItemTrait.TYPE);
 		if (!cur && !prev) {
 			return;
 		}
@@ -107,7 +109,7 @@ public class ClaimTool implements Listener {
 	
 	@EventHandler
 	public void onMove(PlayerMoveEvent e) {
-		if (!ItemUtils.compare(item, e.getPlayer().getInventory().getItemInMainHand())) {
+		if (!ItemUtils.compare(item, e.getPlayer().getInventory().getItemInMainHand(), ItemTrait.TYPE)) {
 			return;
 		}
 		Claim to = ClaimMap.getClaim(e.getTo());
@@ -157,7 +159,7 @@ public class ClaimTool implements Listener {
 				return;
 			}
 			ItemStack item = player.getInventory().getItemInMainHand();
-			if (!ItemUtils.compare(item, ClaimTool.this.item)) {
+			if (!ItemUtils.compare(item, ClaimTool.this.item, ItemTrait.TYPE)) {
 				displayer.clear();
 				return;
 			}
@@ -178,33 +180,33 @@ public class ClaimTool implements Listener {
 			int[] dim = region.getBlockDimensions();
 			int blocksClaimed = dim[0] * dim[2];
 			if (budget < blocksClaimed) {
-				showCorners(Messages.msg("claimTooLarge").replace("%blocks%", blocksClaimed + "").replace("%budget%", budget + ""), loc1, loc2, Material.REDSTONE_BLOCK);
+				showCorners(messages.get("claimTooLarge").replace("%blocks%", blocksClaimed + "").replace("%budget%", budget + ""), loc1, loc2, Material.REDSTONE_BLOCK);
 				return;
 			}
 			Set<Claim> overlap = ClaimMap.getClaims(region);
 			OverlapResult overlapResult = checkOverlap(overlap, loc1, loc2);
 			if (overlapResult == OverlapResult.OVERLAPS) {
-				showCorners(Messages.msg("claimOverlap"), loc1, loc2, Material.REDSTONE_BLOCK);
+				showCorners(messages.get("claimOverlap"), loc1, loc2, Material.REDSTONE_BLOCK);
 				return;
 			}
 			if (overlapResult == OverlapResult.CLAIM && (dim[0] < 10 || dim[2] < 10)) {
-				showCorners(Messages.msg("claimTooSmall").replace("%dims%", dim[0] + "x" + dim[2]), loc1, loc2, Material.REDSTONE_BLOCK);
+				showCorners(messages.get("claimTooSmall").replace("%dims%", dim[0] + "x" + dim[2]), loc1, loc2, Material.REDSTONE_BLOCK);
 				return;
 			}
 			if (overlapResult == OverlapResult.SUBCLAIM && (dim[0] < 3 || dim[1] < 3 || dim[2] < 3)) {
-				showCorners(Messages.msg("subclaimTooSmallTool").replace("%dims%", dim[0] + "x" + dim[1] + "x" + dim[2]), loc1, loc2, Material.REDSTONE_BLOCK);
+				showCorners(messages.get("subclaimTooSmallTool").replace("%dims%", dim[0] + "x" + dim[1] + "x" + dim[2]), loc1, loc2, Material.REDSTONE_BLOCK);
 				return;
 			}
 			if (overlapResult == OverlapResult.CLAIM) {
-				showCorners(Messages.msg("claimToolInfo").replace("%dims%", dim[0] + "x" + dim[2]).replace("%blocks%", blocksClaimed + "").replace("%budget%", budget + ""), loc1, loc2, Material.EMERALD_BLOCK);
+				showCorners(messages.get("claimToolInfo").replace("%dims%", dim[0] + "x" + dim[2]).replace("%blocks%", blocksClaimed + "").replace("%budget%", budget + ""), loc1, loc2, Material.EMERALD_BLOCK);
 				return;
 			}
 			Claim claim = overlap.iterator().next();
 			if (claim.getSubclaims().stream().anyMatch(c -> c.getRegion().overlaps(region))) {
-				showCorners(Messages.msg("subclaimOverlaps"), loc1, loc2, Material.REDSTONE_BLOCK);
+				showCorners(messages.get("subclaimOverlaps"), loc1, loc2, Material.REDSTONE_BLOCK);
 				return;
 			}
-			showCorners(Messages.msg("subclaimValid"), loc1, loc2, Material.EMERALD_BLOCK);
+			showCorners(messages.get("subclaimValid"), loc1, loc2, Material.EMERALD_BLOCK);
 		}
 		
 		private OverlapResult checkOverlap(Set<Claim> claims, Location loc1, Location loc2) {
