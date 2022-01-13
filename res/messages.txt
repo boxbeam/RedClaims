@@ -12,6 +12,7 @@ cannotSetOwnerRole: &cYou cannot change the owner's role directly! To change the
 roleSet: &aRole set!
 claimInfoHeader: &aClaim: &e%name%
 claimFlags: &aProtections: %flags%
+claimLocation: &aLocation: &e%location%
 primaryColor: &a
 secondaryColor: &e
 claimBlocks: &aClaim size: &e%blocks%

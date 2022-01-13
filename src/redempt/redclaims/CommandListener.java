@@ -242,12 +242,17 @@ public class CommandListener {
 		sender.sendMessage(Messages.msg("protectionRemoved"));
 	}
 
+	private String display(Location loc) {
+		return loc.getWorld().getName() + " " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ();
+	}
+	
 	public void showClaimInfo(CommandSender sender, Claim claim, boolean showMembers) {
 		sender.sendMessage(Messages.msg("claimInfoHeader").replace("%name%", claim.getFullName()));
 		String primary = Messages.msg("primaryColor");
 		String secondary = Messages.msg("secondaryColor");
 		ClaimStorage storage = plugin.getClaimStorage();
 		sender.sendMessage(Messages.msg("claimBlocks").replace("%blocks%", storage.getClaimBlocks(claim) + ""));
+		sender.sendMessage(Messages.msg("claimLocation").replace("%location%", display(claim.getRegion().getCenter())));
 		sender.sendMessage(Messages.msg("claimFlags").replace("%flags%", claim.getFlags().stream().map(f -> secondary + f.getName()).collect(Collectors.joining(primary + ", "))));
 		if (showMembers) {
 			sender.sendMessage(Messages.msg("claimMembers").replace("%members%", claim.getAllMembers().entrySet().stream()
