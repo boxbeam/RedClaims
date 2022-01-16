@@ -5,13 +5,16 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import redempt.redclaims.ClaimFlag;
 import redempt.redclaims.ClaimLimits;
+import redempt.redlib.misc.LocationUtils;
 import redempt.redlib.region.CuboidRegion;
 import redempt.redlib.sql.SQLHelper;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -80,7 +83,7 @@ public class ClaimStorage {
 	}
 	
 	public void loadAll() {
-		Map<Subclaim, String> subclaims = new HashMap<>();
+		Map<String, List<Subclaim>> subclaims = new HashMap<>();
 		sql.queryResults("SELECT * FROM claims;").forEach(r -> {
 			UUID id = UUID.fromString(r.getString(1));
 			String name = r.getString(2);
@@ -89,19 +92,29 @@ public class ClaimStorage {
 				.filter(s -> s.length() != 0)
 				.map(ClaimFlag.BY_NAME::get)
 				.collect(Collectors.toCollection(LinkedHashSet::new));
-			CuboidRegion region = CuboidRegion.fromString(r.getString(5));
-			if (parent != null) {
-				Subclaim sub = new Subclaim(sql, name, region, id, flags);
-				subclaims.put(sub, parent.toLowerCase());
-				return;
-			}
-			Claim claim = new Claim(sql, name, region, id, flags);
-			claims.computeIfAbsent(id, k -> new HashMap<>()).put(name.toLowerCase(), claim);
-		});
-		subclaims.forEach((k, v) -> {
-			Claim claim = getClaim(k.getOwner().getUniqueId(), v);
-			claim.getSubclaims().add(k);
-			k.setParent(claim);
+			String regionString = r.getString(5);
+			String worldName = regionString.substring(0, regionString.indexOf(' '));
+			LocationUtils.waitForWorld(worldName, w -> {
+				CuboidRegion region = CuboidRegion.fromString(r.getString(5));
+				if (parent != null) {
+					Subclaim sub = new Subclaim(sql, name, region, id, flags);
+					Claim parentClaim = getClaim(id, parent);
+					if (parentClaim != null) {
+						sub.setParent(parentClaim);
+						parentClaim.getSubclaims().add(sub);
+					} else {
+						subclaims.computeIfAbsent(parent.toLowerCase(), k -> new ArrayList<>()).add(sub);
+					}
+					return;
+				}
+				Claim claim = new Claim(sql, name, region, id, flags);
+				claims.computeIfAbsent(id, k -> new HashMap<>()).put(name.toLowerCase(), claim);
+				subclaims.getOrDefault(name, new ArrayList<>()).forEach(sub -> {
+					sub.setParent(claim);
+					claim.getSubclaims().add(sub);
+				});
+				subclaims.remove(name);
+			});
 		});
 		sql.queryResults("SELECT * FROM members;").forEach(r -> {
 			UUID owner = UUID.fromString(r.getString(1));
