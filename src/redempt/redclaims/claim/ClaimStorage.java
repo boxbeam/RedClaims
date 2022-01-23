@@ -95,7 +95,7 @@ public class ClaimStorage {
 			String regionString = r.getString(5);
 			String worldName = regionString.substring(0, regionString.indexOf(' '));
 			LocationUtils.waitForWorld(worldName, w -> {
-				CuboidRegion region = CuboidRegion.fromString(r.getString(5));
+				CuboidRegion region = CuboidRegion.fromString(regionString);
 				if (parent != null) {
 					Subclaim sub = new Subclaim(sql, name, region, id, flags);
 					Claim parentClaim = getClaim(id, parent);
