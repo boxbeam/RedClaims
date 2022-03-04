@@ -5,6 +5,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import redempt.redclaims.ClaimFlag;
 import redempt.redclaims.ClaimLimits;
+import redempt.redclaims.RedClaims;
 import redempt.redlib.misc.LocationUtils;
 import redempt.redlib.region.CuboidRegion;
 import redempt.redlib.sql.SQLHelper;
@@ -127,6 +128,9 @@ public class ClaimStorage {
 	}
 	
 	public Claim createClaim(Player owner, String name, CuboidRegion region, boolean dummy) {
+		if (RedClaims.getInstance().config().unclaimableWorlds.contains(region.getWorld().getName())) {
+			throw new IllegalArgumentException("This world cannot be claimed");
+		}
 		int[] dim = region.getBlockDimensions();
 		if (dim[0] < 10 || dim[2] < 10) {
 			throw new IllegalArgumentException("Claim is too small, must be at least 10x10");

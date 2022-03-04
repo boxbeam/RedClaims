@@ -91,7 +91,7 @@ public class CommandListener {
 		ContextProvider<Claim> currentClaimProvider = new ContextProvider<>("currentClaim", Messages.msg("notInClaim"), c -> ClaimMap.getClaim(c.getLocation()));
 		ContextProvider<Subclaim> currentSubclaimProvider = currentClaimProvider.map("currentSubclaim", Messages.msg("notInSubclaim"), (s, c) -> c.getSubclaim(s.getLocation()));
 		
-		tool = new ClaimTool(plugin, new ItemStack(RedClaims.getInstance().config().claimTool()));
+		tool = new ClaimTool(plugin, new ItemStack(RedClaims.getInstance().config().claimTool));
 		
 		new CommandParser(plugin.getResource("command.rdcml"))
 				.setArgTypes(claimType, subclaimType, flagType, userType, rankType)

@@ -48,6 +48,7 @@ public class Claim {
 		this.name = name;
 		this.owner = owner;
 		Collections.addAll(flags, ClaimFlag.ALL);
+		flags.removeAll(RedClaims.getInstance().config().defaultDisabledFlags);
 		if (region != null) {
 			updateRegion(region);
 		}

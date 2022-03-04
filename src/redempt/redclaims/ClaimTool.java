@@ -175,6 +175,10 @@ public class ClaimTool implements Listener {
 		}
 		
 		private void showSelection(Location loc1, Location loc2) {
+			if (RedClaims.getInstance().config().unclaimableWorlds.contains(loc1.getWorld().getName())) {
+				showCorners(messages.get("unclaimableWorld"), loc1, loc2, Material.REDSTONE_BLOCK);
+				return;
+			}
 			CuboidRegion region = new CuboidRegion(loc1, loc2);
 			region.expand(1, 0, 1, 0, 1, 0);
 			int[] dim = region.getBlockDimensions();

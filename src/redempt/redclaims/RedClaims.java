@@ -36,8 +36,10 @@ public class RedClaims extends JavaPlugin implements Listener {
 		Messages.load(this);
 		new CommandListener(this).register();
 		new MiscProtections(this);
-		ConfigManager.create(this).target(new RedClaimsConfig()).saveDefaults().load();
-		ClaimLimits.init(this, config().defaultClaimBlocks());
+		ConfigManager.create(this)
+				.addConverter(ClaimFlag.class, ClaimFlag.BY_NAME::get, ClaimFlag::getName)
+				.target(config).saveDefaults().load();
+		ClaimLimits.init(this, config().defaultClaimBlocks);
 		ClaimVisualizer.init();
 	}
 	

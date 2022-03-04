@@ -41,6 +41,24 @@ public class ClaimFlag {
 		return name;
 	}
 	
+	@Override
+	public String toString() {
+		return getName();
+	}
+	
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof ClaimFlag flag)) {
+			return false;
+		}
+		return flag.name.equals(name);
+	}
+	
 	public ProtectionType[] getProtectionTypes() {
 		return types;
 	}
