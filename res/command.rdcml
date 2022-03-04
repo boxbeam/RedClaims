@@ -1,4 +1,5 @@
 claim,c claim:claim {
+	permission redclaims.use
 	budget {
 		help Shows your claim budget and how much of it you have used
 		user player
