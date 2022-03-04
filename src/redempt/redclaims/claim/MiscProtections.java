@@ -118,13 +118,11 @@ public class MiscProtections implements Listener {
 			return;
 		}
 		Player player = getPlayer(e.getDamager());
-		if (player != null && e.getEntity() instanceof Player) {
-			if (claim.flagApplies(e.getEntity().getLocation(), "pvp")) {
-				e.setCancelled(true);
-				return;
-			}
+		if (player != null && e.getEntity() instanceof Player && claim.flagApplies(e.getEntity().getLocation(), "pvp")) {
+			e.setCancelled(true);
+			return;
 		}
-		if (!claim.flagApplies(e.getEntity().getLocation(), "animals")) {
+		if (!claim.flagApplies(e.getEntity().getLocation(), "animals") || e.getEntity() instanceof Player) {
 			return;
 		}
 		if (e.getDamager() instanceof Projectile) {
@@ -134,11 +132,7 @@ public class MiscProtections implements Listener {
 				return;
 			}
 		}
-		if (player == null && !(e.getEntity() instanceof Player)) {
-			e.setCancelled(true);
-			return;
-		}
-		if (player != null && !hasAtLeast(claim, player, ClaimRank.MEMBER)) {
+		if (player == null || !hasAtLeast(claim, player, ClaimRank.MEMBER)) {
 			e.setCancelled(true);
 		}
 	}
