@@ -189,12 +189,12 @@ public class MiscProtections implements Listener {
 	public void onMove(PlayerMoveEvent e) {
 		Claim to = ClaimMap.getClaim(e.getTo());
 		Claim from = ClaimMap.getClaim(e.getFrom());
-		if (to != null && to != from) {
+		if (to != null && to != from && !to.flagApplies(e.getTo(), "noannounce")) {
 			e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR,
 					new TextComponent(Messages.msg("enteringClaim").replace("%player%", to.getOwner().getName()).replace("%claim%", to.getName())));
 			return;
 		}
-		if (to == null && from != null) {
+		if (to == null && from != null && !from.flagApplies(e.getFrom(), "noannounce")) {
 			e.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(Messages.msg("exitingClaim")));
 			return;
 		}

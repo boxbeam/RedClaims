@@ -40,3 +40,4 @@ claimResized: &aClaim resized!
 subclaimDeleted: &aSubclaim deleted!
 subclaimResized: &aSubclaim resized!
 unclaimableWorld: &cYou may not create claims in this world!
+noFlagPermission: &cYou do not have permission to use that flag!

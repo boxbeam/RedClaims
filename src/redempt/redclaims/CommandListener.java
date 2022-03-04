@@ -228,6 +228,10 @@ public class CommandListener {
 			sender.sendMessage(Messages.msg("notOwner"));
 			return;
 		}
+		if (Arrays.stream(flags).anyMatch(f -> !sender.hasPermission("redclaims.flag." + f.getName()))) {
+			sender.sendMessage(Messages.msg("noFlagPermission"));
+			return;
+		}
 		subclaim.addFlag(flags);
 		sender.sendMessage(Messages.msg("protectionAdded"));
 	}
@@ -336,6 +340,10 @@ public class CommandListener {
 	public void addClaimFlag(CommandSender sender, Claim claim, ClaimFlag[] flags) {
 		if (!claim.hasAtLeast(sender, ClaimRank.OWNER)) {
 			sender.sendMessage(Messages.msg("notOwner"));
+			return;
+		}
+		if (Arrays.stream(flags).anyMatch(f -> !sender.hasPermission("redclaims.flag." + f.getName()))) {
+			sender.sendMessage(Messages.msg("noFlagPermission"));
 			return;
 		}
 		claim.addFlag(flags);
