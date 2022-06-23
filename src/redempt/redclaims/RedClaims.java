@@ -1,7 +1,6 @@
 package redempt.redclaims;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import redempt.redclaims.claim.ClaimStorage;
@@ -41,6 +40,9 @@ public class RedClaims extends JavaPlugin implements Listener {
 				.target(config).saveDefaults().load();
 		ClaimLimits.init(this, config().defaultClaimBlocks);
 		ClaimVisualizer.init();
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new ClaimExpansion().register();
+        }
 	}
 	
 	public RedClaimsConfig config() {

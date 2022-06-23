@@ -1,6 +1,7 @@
 name: RedClaims
 version: 1.0
 depend: [RedLib]
+softdepend: [PlaceholderAPI]
 author: Redempt
 main: redempt.redclaims.RedClaims
 api-version: 1.17

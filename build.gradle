@@ -21,10 +21,14 @@ repositories {
 	maven {
 		url = "https://redempt.dev"
 	}
+    maven {
+        url = "https://repo.extendedclip.com/content/repositories/placeholderapi/"
+    }
 }
 dependencies {
 	compileOnly "org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT"
 	compileOnly "com.github.Redempt:RedLib:6.5.1.3"
+    compileOnly "me.clip:placeholderapi:2.11.1"
 }
 sourceSets {
 	main {
