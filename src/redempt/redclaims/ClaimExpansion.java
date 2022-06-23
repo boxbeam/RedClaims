@@ -28,7 +28,7 @@ public class ClaimExpansion extends PlaceholderExpansion {
 
     @Override
     public boolean persist() {
-        return true; // This is required or else PlaceholderAPI will unregister the Expansion on reload
+        return false;
     }
 
     @Override
