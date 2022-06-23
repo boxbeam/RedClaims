@@ -1,7 +1,6 @@
 package redempt.redclaims;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import redempt.redclaims.claim.Claim;
@@ -34,29 +33,22 @@ public class ClaimExpansion extends PlaceholderExpansion {
 
     @Override
     public String onRequest(OfflinePlayer offlinePlayer, String placeholder) {
-        Player player = offlinePlayer.getPlayer();
+        Player player = offlinePlayer.isOnline() ? offlinePlayer.getPlayer() : null;
         ClaimStorage claimStorage = RedClaims.getInstance().getClaimStorage();
-
-        // Check if the player isn't null, because you can't do anything if they are.
-
-        if (player != null && claimStorage.hasClaim(player.getUniqueId())) {
-            // Make the local variables with the values, budget, budget used & location.
-            int budget = ClaimLimits.getClaimLimit(player);
-            int budgetUsed = redClaims.getClaimStorage().getClaimedBlocks(player.getUniqueId());
-            Location location = player.getLocation();
-            Claim claim = ClaimMap.getClaim(location);
-
-            // Do the check to see which placeholder the user wants and return the value.
-            if (placeholder.equalsIgnoreCase("player_budget")) {
-                return Integer.toString(budget);
-            } else if (placeholder.equalsIgnoreCase("player_budget_used")) {
-                return Integer.toString(budgetUsed);
-            } else if (placeholder.equalsIgnoreCase("claim_player_is_in")) {
-                if (claim != null) {
-                    return claim.getName();
+        switch (placeholder) {
+            case "budget":
+                return player == null ? null : Integer.toString(ClaimLimits.getClaimLimit(player));
+            case "remaining_budget":
+                return player == null ? null : Integer.toString(ClaimLimits.getRemainingClaimLimit(player));
+            case "used_budget":
+                return Integer.toString(claimStorage.getClaimedBlocks(offlinePlayer.getUniqueId()));
+            case "current_claim":
+                if (player == null) {
+                    return null;
                 }
-            }
+                Claim claim = ClaimMap.getClaim(player.getLocation());
+                return claim == null ? null : claim.getFullName();
         }
-        return null; // Placeholder is unknown by the Expansion
+        return null;
     }
 }
