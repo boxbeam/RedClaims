@@ -169,6 +169,10 @@ public class ClaimStorage {
 		claims.get(claim.getOwner().getUniqueId()).remove(claim.getName().toLowerCase());
 	}
 	
+	public void hasClaim(UUID uuid) {
+		return claims.containsKey(uuid);
+	}
+	
 	public void close() {
 		sql.commit();
 		sql.close();
